@@ -52,27 +52,27 @@
             font-size: 1.1rem;
         }
 
-        /* 圖片預留區 */
-        .img-placeholder {
+        /* --- 圖片顯示區 (修改後) --- */
+        .img-container {
             width: 100%;
-            height: 250px;
-            background-color: #ecf0f1;
-            border: 3px dashed #bdc3c7;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #7f8c8d;
             margin: 30px 0;
-            font-weight: bold;
-            transition: all 0.3s;
+            text-align: center;
         }
 
-        .img-placeholder:hover {
-            border-color: var(--highlight);
-            color: var(--highlight);
-            background-color: #eaf2f8;
+        .img-container img {
+            max-width: 100%;       /* 讓圖片寬度不超過容器 */
+            height: auto;          /* 高度自動調整，保持比例 */
+            border-radius: 12px;   /* 圓角 */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* 陰影 */
+            border: 1px solid #ddd;
+        }
+
+        /* 圖片說明文字 */
+        .img-caption {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-style: italic;
         }
 
         /* 課文區塊 */
@@ -209,9 +209,13 @@
         <p class="subtitle">主題：刺激與反應、神經元的構造</p>
     </header>
 
-    <div class="img-placeholder">
-        <span style="font-size: 3rem; margin-bottom: 10px;">👁️ 👂 👃</span>
-        [請在此處插入課本圖 4-1：人體的各種感覺器官]
+    <!-- 第一部分：刺激與反應 -->
+    <!-- ⬇️ 圖片區塊 1：受器 -->
+    <div class="img-container">
+        <!-- 💡 請將 src="" 內的網址換成您的圖片連結 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Human_senses.jpg/640px-Human_senses.jpg" 
+             alt="圖 4-1：人體的各種感覺器官">
+        <div class="img-caption">圖 4-1：人體的各種感覺器官</div>
     </div>
 
     <div class="text-section">
@@ -303,9 +307,13 @@
         </p>
     </div>
 
-    <div class="img-placeholder">
-        <span style="font-size: 3rem; margin-bottom: 10px;">🧬</span>
-        [請在此處插入課本圖 4-3：神經元的構造模式圖]
+    <!-- 第二部分：神經元 -->
+    <!-- ⬇️ 圖片區塊 2：神經元 (您要求的修改處) -->
+    <div class="img-container">
+        <!-- 💡 請將 src="" 內的網址換成您的圖片連結 -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Neuron.svg/640px-Neuron.svg.png" 
+             alt="圖 4-3：神經元的構造模式圖">
+        <div class="img-caption">圖 4-3：神經元的構造模式圖</div>
     </div>
 
     <div class="text-section">
@@ -348,9 +356,10 @@
         </p>
     </div>
 
+    <!-- 檢查與進度 -->
     <div class="action-area">
         <button class="btn check-btn" onclick="checkAnswers()">檢查答案 🔍</button>
-        <a href="1.html" class="btn next-btn" id="nextLink">進入正式課程 🚀</a>
+        <a href="1.html" class="btn next-btn" id="nextLink">進入課程 🚀</a>
         
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
@@ -398,8 +407,6 @@
         } else {
             statusText.textContent = `加油！目前答對 ${correctCount} / ${totalCount} 題，紅色的地方再試試看！`;
             statusText.style.color = "#c0392b";
-            // 隱藏下一頁按鈕（如果之前顯示過，現在答錯要隱藏嗎？通常不用，但嚴格來說可以隱藏）
-            // document.getElementById('nextLink').style.display = 'none'; 
         }
     }
 </script>
