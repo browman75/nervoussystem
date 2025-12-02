@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神經系統大冒險 - 學習入口</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;      /* 深藍色背景 */
+            --neuron-color: #38bdf8;  /* 神經元亮藍色 */
+            --core-color: #facc15;    /* 細胞核黃色 */
+            --spark-color: #ffffff;   /* 電流白色 */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.1) 0%, transparent 20%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: "微軟正黑體", sans-serif;
+            overflow: hidden;
+            cursor: pointer; /* 讓滑鼠變成手指，提示可點擊 */
+        }
+
+        /* --- 文字標題區 --- */
+        .title-container {
+            text-align: center;
+            color: white;
+            z-index: 10;
+            margin-bottom: 20px;
+            pointer-events: none; /* 讓點擊穿透到 body */
+            animation: fadeInDown 1s ease-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.8);
+            letter-spacing: 5px;
+        }
+
+        p {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-top: 10px;
+            animation: pulseText 2s infinite;
+        }
+
+        /* --- 神經元 SVG 容器 --- */
+        .neuron-container {
+            width: 600px;
+            height: 400px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .neuron-container:hover {
+            transform: scale(1.05);
+        }
+
+        /* SVG 線條樣式 */
+        .neuron-path {
+            fill: none;
+            stroke: var(--neuron-color);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 10px var(--neuron-color));
+        }
+
+        .neuron-body {
+            fill: rgba(56, 189, 248, 0.2);
+            stroke: var(--neuron-color);
+            stroke-width: 5;
+            filter: drop-shadow(0 0 15px var(--neuron-color));
+        }
+
+        .nucleus {
+            fill: var(--core-color);
+            filter: drop-shadow(0 0 15px var(--core-color));
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        /* --- 放電特效 (預設隱藏) --- */
+        .spark {
+            fill: var(--spark-color);
+            filter: drop-shadow(0 0 10px white);
+            opacity: 0; /* 初始隱藏 */
+            r: 8;
+        }
+
+        /* 放電時的電流動畫 */
+        .firing .spark {
+            opacity: 1;
+            offset-path: path("M150,200 Q250,200 350,200 T550,200"); /* 沿著軸突的路徑 */
+            animation: moveSpark 1s linear forwards;
+        }
+
+        /* 放電時的細胞本體閃爍 */
+        .firing .neuron-body, .firing .neuron-path {
+            animation: flashBody 0.2s ease-in-out;
+        }
+
+        /* 點擊後的漣漪擴散特效 (Overlay) */
+        .ripple-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 1);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* --- 動畫定義 --- */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes breathe {
+            0%, 100% { r: 15; opacity: 0.8; }
+            50% { r: 18; opacity: 1; }
+        }
+
+        @keyframes moveSpark {
+            0% { offset-distance: 0%; opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1.5); }
+            100% { offset-distance: 100%; opacity: 0; transform: scale(0); }
+        }
+
+        @keyframes flashBody {
+            0% { filter: drop-shadow(0 0 15px var(--neuron-color)); stroke: var(--neuron-color); }
+            50% { filter: drop-shadow(0 0 50px white); stroke: white; }
+            100% { filter: drop-shadow(0 0 15px var(--neuron-color)); stroke: var(--neuron-color); }
+        }
+
+        @keyframes expandRipple {
+            0% { width: 0; height: 0; opacity: 0.8; }
+            100% { width: 300vw; height: 300vw; opacity: 0; }
+        }
+
+    </style>
+</head>
+<body onclick="activateNeuron()">
+
+    <div class="title-container">
+        <h1>神經系統大冒險</h1>
+        <p>點擊畫面任何一處，啟動神經連結！</p>
+    </div>
+
+    <div class="neuron-container" id="neuron">
+        <svg viewBox="0 0 600 400" width="100%" height="100%">
+            <!-- 樹突 (Dendrites) -->
+            <path class="neuron-path" d="M150,200 L80,140 M80,140 L60,110 M80,140 L100,100" />
+            <path class="neuron-path" d="M150,200 L80,260 M80,260 L60,290 M80,260 L100,300" />
+            <path class="neuron-path" d="M150,200 L50,200" />
+
+            <!-- 軸突 (Axon) - 這是電流要跑的路徑 -->
+            <!-- 使用 path 定義彎曲的軸突 -->
+            <path id="axon-path" class="neuron-path" d="M150,200 Q250,200 350,200 T550,200" />
+            
+            <!-- 軸突末梢 (Axon Terminals) -->
+            <path class="neuron-path" d="M550,200 L580,170" />
+            <path class="neuron-path" d="M550,200 L580,230" />
+
+            <!-- 細胞本體 (Soma) - 不規則星形 -->
+            <polygon class="neuron-body" points="150,200 120,160 160,150 190,180 210,200 190,220 160,250 120,240" />
+
+            <!-- 細胞核 (Nucleus) -->
+            <circle class="nucleus" cx="155" cy="200" r="15" />
+
+            <!-- 電流光點 (Spark) -->
+            <circle class="spark" />
+        </svg>
+    </div>
+
+    <!-- 轉場特效層 -->
+    <div class="ripple-overlay" id="ripple"></div>
+
+    <script>
+        let isActivated = false;
+
+        function activateNeuron() {
+            if (isActivated) return; // 防止重複點擊
+            isActivated = true;
+
+            const neuron = document.getElementById('neuron');
+            const ripple = document.getElementById('ripple');
+            
+            // 1. 播放放電音效 (簡單的高頻音)
+            playZapSound();
+
+            // 2. 啟動神經元動畫 class
+            neuron.classList.add('firing');
+
+            // 3. 0.8秒後 (電流快跑完時) 啟動轉場白光
+            setTimeout(() => {
+                ripple.style.animation = "expandRipple 1s ease-out forwards";
+            }, 800);
+
+            // 4. 1.5秒後跳轉頁面 (等待動畫與白光結束)
+            setTimeout(() => {
+                // 這裡假設您的第一個單元檔案名稱為 1-0.html (若有不同請自行修改)
+                window.location.href = '1-0.html';
+            }, 1500);
+        }
+
+        // 簡單的音效生成器 (Web Audio API)
+        function playZapSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sawtooth'; // 鋸齒波比較像電流聲
+                osc.frequency.setValueAtTime(200, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1); // 頻率快速升高
+
+                gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) {
+                console.log("Audio play failed (user interaction policy)");
+            }
+        }
+    </script>
+</body>
+</html>
