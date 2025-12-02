@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影音導讀：腦的功能介紹</title>
+    <style>
+        :root {
+            --primary: #d35400;
+            --accent: #e67e22;
+            --bg-color: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-color: #ecf0f1;
+            --success: #27ae60;
+            --error: #c0392b;
+            --input-bg: #34495e;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- 影片區塊 --- */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+            background: black;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* --- 內容區塊 --- */
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            border-left: 5px solid var(--accent);
+            padding-left: 15px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        p.instruction {
+            color: #bdc3c7;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        /* --- 題目樣式 --- */
+        .question-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #34495e;
+            transition: transform 0.2s;
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Q1: 複選按鈕 */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            padding: 12px 15px;
+            border: 2px solid #34495e;
+            border-radius: 8px;
+            background: transparent;
+            color: #bdc3c7;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .option-btn.selected {
+            background: #34495e;
+            border-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        .option-btn.selected::after {
+            content: " ✓";
+            float: right;
+        }
+
+        /* Q2: 填充題輸入框 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #34495e;
+            background: var(--input-bg);
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* 送出按鈕 */
+        .check-btn {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .check-btn:hover { background: #a04000; }
+        .check-btn:disabled { background: #7f8c8d; cursor: not-allowed; }
+
+        /* 回饋樣式 */
+        .feedback {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: none;
+        }
+        .feedback.correct { color: var(--success); display: block; }
+        .feedback.wrong { color: var(--error); display: block; }
+
+        /* --- 底部導覽 --- */
+        .footer-nav {
+            margin-top: 30px;
+            text-align: center;
+            padding-bottom: 50px;
+        }
+
+        .next-btn {
+            display: inline-block;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            background: var(--success);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.4);
+            transition: all 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(1);
+        }
+
+        .next-btn.unlocked {
+            opacity: 1;
+            pointer-events: auto;
+            filter: grayscale(0);
+            animation: bounce 1s infinite;
+        }
+
+        .lock-msg {
+            margin-top: 10px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="video-container">
+        <!-- 請將 'VIDEO_ID' 替換為實際的 YouTube 影片 ID -->
+        <iframe 
+            src="https://www.youtube.com/embed/VIDEO_ID?autoplay=0&mute=1&rel=0&modestbranding=1" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="content-area">
+        <h2>🎥 腦的功能介紹影片</h2>
+        <p class="instruction">說明：請觀看影片，並回答下列影片中才有介紹的內容。</p>
+
+        <!-- Q1: 複選題 -->
+        <div class="question-card" id="q1">
+            <div class="question-title">
+                <span class="badge">勾選題</span>
+                1. 腦幹可以再細分為哪三個構造？(請勾選所有正確答案)
+            </div>
+            <div class="options">
+                <!-- 選項包含正確答案與誘答 -->
+                <button class="option-btn" onclick="toggleOption(this)" data-val="中腦">A. 中腦</button>
+                <button class="option-btn" onclick="toggleOption(this)" data-val="脊髓">B. 脊髓</button>
+                <button class="option-btn" onclick="toggleOption(this)" data-val="橋腦">C. 橋腦（腦橋）</button>
+                <button class="option-btn" onclick="toggleOption(this)" data-val="間腦">D. 間腦</button>
+                <button class="option-btn" onclick="toggleOption(this)" data-val="延腦">E. 延腦</button>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="check-btn" onclick="checkQ1()">確認送出</button>
+            </div>
+            <div class="feedback" id="fb1"></div>
+        </div>
+
+        <!-- Q2: 填充題 -->
+        <div class="question-card" id="q2">
+            <div class="question-title">
+                <span class="badge">填充題</span>
+                2. 腦的中心區域還有一個什麼區域，位於大腦、小腦、腦幹之間？
+            </div>
+            <div class="input-group">
+                <input type="text" class="text-input" id="q2-input" placeholder="請輸入答案...">
+                <button class="check-btn" onclick="checkQ2()">確認送出</button>
+            </div>
+            <div class="feedback" id="fb2"></div>
+        </div>
+
+        <div class="footer-nav">
+            <a href="3-0.html" id="next-link" class="next-btn">
+                前往單元 3：意識與反射 ➜
+            </a>
+            <div class="lock-msg" id="lock-msg">🔒 請先答對所有問題</div>
+        </div>
+    </div>
+
+    <script>
+        // 答題狀態
+        let status = {
+            1: false,
+            2: false
+        };
+
+        // --- Q1 邏輯 (複選) ---
+        function toggleOption(btn) {
+            // 如果已經答對鎖定，則不允許修改
+            if (status[1]) return;
+            btn.classList.toggle('selected');
+        }
+
+        function checkQ1() {
+            if (status[1]) return; // 已答對則不處理
+
+            // 取得所有被選中的按鈕
+            const selectedBtns = document.querySelectorAll('#q1 .option-btn.selected');
+            const selectedValues = Array.from(selectedBtns).map(btn => btn.getAttribute('data-val'));
+            
+            // 正確答案集合
+            const correctSet = new Set(['中腦', '橋腦', '延腦']);
+            
+            // 檢查邏輯：
+            // 1. 選中數量必須等於正確答案數量 (3個)
+            // 2. 所有選中的值都必須在正確答案集合中
+            const isCorrect = selectedValues.length === 3 && 
+                              selectedValues.every(val => correctSet.has(val));
+
+            const fb = document.getElementById('fb1');
+            const confirmBtn = document.querySelector('#q1 .check-btn');
+
+            if (isCorrect) {
+                fb.textContent = "✅ 答對了！腦幹包含中腦、橋腦與延腦。";
+                fb.className = "feedback correct";
+                status[1] = true;
+                
+                // 鎖定狀態
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = "已完成";
+                const allOptions = document.querySelectorAll('#q1 .option-btn');
+                allOptions.forEach(btn => {
+                    btn.style.pointerEvents = 'none';
+                    if(!btn.classList.contains('selected')) {
+                        btn.style.opacity = '0.5'; // 淡化未選選項
+                    } else {
+                        btn.style.borderColor = 'var(--success)';
+                        btn.style.backgroundColor = 'rgba(39, 174, 96, 0.2)';
+                    }
+                });
+
+                checkAllCorrect();
+            } else {
+                fb.textContent = "❌ 答案不完整或有誤，請再試一次！(提示：共有三個構造)";
+                fb.className = "feedback wrong";
+                // 震動效果
+                document.getElementById('q1').style.transform = "translateX(5px)";
+                setTimeout(() => document.getElementById('q1').style.transform = "translateX(0)", 100);
+            }
+        }
+
+        // --- Q2 邏輯 (填充) ---
+        // 支援按 Enter 送出
+        document.getElementById('q2-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                checkQ2();
+            }
+        });
+
+        function checkQ2() {
+            if (status[2]) return;
+
+            const input = document.getElementById('q2-input');
+            const val = input.value.trim();
+            const fb = document.getElementById('fb2');
+            const confirmBtn = document.querySelector('#q2 .check-btn');
+
+            if (val === '間腦') {
+                fb.textContent = "✅ 答對了！間腦位於大腦與腦幹之間。";
+                fb.className = "feedback correct";
+                status[2] = true;
+
+                // 鎖定
+                input.disabled = true;
+                input.style.borderColor = 'var(--success)';
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = "已完成";
+
+                checkAllCorrect();
+            } else {
+                fb.textContent = "❌ 答案不正確，請參考影片內容再試一次。";
+                fb.className = "feedback wrong";
+                
+                // 震動
+                document.getElementById('q2').style.transform = "translateX(5px)";
+                setTimeout(() => document.getElementById('q2').style.transform = "translateX(0)", 100);
+            }
+        }
+
+        // --- 檢查全部完成 ---
+        function checkAllCorrect() {
+            if (status[1] && status[2]) {
+                const nextBtn = document.getElementById('next-link');
+                const lockMsg = document.getElementById('lock-msg');
+                
+                nextBtn.classList.add('unlocked');
+                lockMsg.textContent = "🎉 恭喜通過！可以前往下一頁了";
+                lockMsg.style.color = "#27ae60";
+            }
+        }
+    </script>
+</body>
+</html>
