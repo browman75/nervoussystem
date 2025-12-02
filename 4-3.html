@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊戲 3：反射 vs. 意識 - 國中生物自學網</title>
+    <style>
+        :root {
+            --primary-color: #e67e22;
+            --reflex-color: #e74c3c;
+            --conscious-color: #3498db;
+            --bg-color: #fdf2e9;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- 頂部資訊列 --- */
+        header {
+            width: 100%;
+            padding: 15px 0;
+            background: #d35400;
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .score-box { font-weight: bold; font-size: 1.5rem; }
+        .life-box { color: #f1c40f; }
+
+        /* --- 遊戲主畫面 --- */
+        .game-area {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+            background: #fff;
+            border-left: 2px solid #edbb99;
+            border-right: 2px solid #edbb99;
+            overflow: hidden;
+        }
+
+        /* 籃子區域 */
+        .baskets-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 120px;
+            display: flex;
+            z-index: 20; /* 確保在氣泡之上 */
+        }
+
+        .basket {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .basket:active { opacity: 0.8; }
+        .basket-left { background-color: var(--reflex-color); border-top-right-radius: 20px; }
+        .basket-right { background-color: var(--conscious-color); border-top-left-radius: 20px; }
+        .basket-icon { font-size: 3rem; margin-bottom: 5px; }
+        .key-hint { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
+
+        /* --- 氣泡樣式 (修改重點) --- */
+        .bubble {
+            position: absolute;
+            transform: translateX(-50%); /* 以中心點對齊 */
+            
+            /* 尺寸與文字設定 */
+            width: 50%;           /* 寬度佔螢幕一半 */
+            min-width: 280px;     /* 手機上至少保持一定寬度 */
+            padding: 20px 10px;
+            font-size: 2rem;      /* 字體加大 */
+            font-weight: bold;
+            text-align: center;
+            
+            background: white;
+            border: 4px solid var(--text-color);
+            border-radius: 60px;  /* 圓角加大 */
+            color: var(--text-color);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15); /* 陰影加深，更有立體感 */
+            
+            z-index: 5;
+            transition: transform 0.3s, opacity 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.2;
+        }
+
+        /* 分類動畫 */
+        .move-left { transform: translate(-100%, 400px) scale(0.2) !important; opacity: 0; }
+        .move-right { transform: translate(100%, 400px) scale(0.2) !important; opacity: 0; }
+
+        /* --- 介面視窗 --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+        }
+
+        .modal h1 { font-size: 2.5rem; color: #e67e22; margin-bottom: 20px; }
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        .start-btn { background: #e74c3c; color: white; }
+        .start-btn:hover { transform: scale(1.05); }
+
+        .next-btn {
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .next-btn.disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .hidden { display: none !important; }
+
+        /* 回饋文字 */
+        .feedback-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 30;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+        }
+        @keyframes popFade {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        .animate-feedback { animation: popFade 0.8s ease-out; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>❤️ <span id="life-display" class="life-box">❤❤❤</span></div>
+        <div>遊戲 3：反射 vs. 意識</div>
+        <div>🏆 <span id="score-display" class="score-box">0</span></div>
+    </header>
+
+    <div class="game-area" id="game-area">
+        <div class="baskets-container">
+            <div class="basket basket-left" onclick="playerAction('reflex')">
+                <div class="basket-icon">⚡</div>
+                <div>反射</div>
+                <div class="key-hint">(← 左鍵)</div>
+            </div>
+            <div class="basket basket-right" onclick="playerAction('conscious')">
+                <div class="basket-icon">🧠</div>
+                <div>意識</div>
+                <div class="key-hint">(右鍵 →)</div>
+            </div>
+        </div>
+        <div id="feedback" class="feedback-text"></div>
+    </div>
+
+    <div id="start-screen" class="modal">
+        <h1>🧠 腦袋分類大作戰</h1>
+        <p style="text-align:center; font-size:1.2rem; line-height:1.6;">
+            氣泡變大了！請快速反應！<br>
+            <strong>反射</strong>(縮手、打噴嚏) 往左邊<br>
+            <strong>意識</strong>(思考、感覺痛) 往右邊
+        </p>
+        <button class="btn start-btn" onclick="startGame()">開始遊戲</button>
+    </div>
+
+    <div id="end-screen" class="modal hidden">
+        <h1 id="end-title">遊戲結束</h1>
+        <p>最終分數：<span id="final-score" style="font-size:3rem; color:#f1c40f;">0</span></p>
+        <p id="end-msg">再接再厲！</p>
+        
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn start-btn" onclick="startGame()">🔄 再玩一次</button>
+            <a href="unit4_lab.html" id="next-page-btn" class="btn next-btn disabled">➡️ 前往單元 4：虛擬實驗室</a>
+        </div>
+        <p id="lock-hint" style="font-size:0.9rem; color:#bdc3c7; margin-top:10px;">(獲得 100 分可解鎖下一頁)</p>
+    </div>
+
+<script>
+    // --- 題庫 ---
+    const questionBank = [
+        { text: "吃到酸梅流口水", type: "reflex" },
+        { text: "手碰到熱鍋縮回", type: "reflex" },
+        { text: "聽到鐘聲進教室", type: "conscious" },
+        { text: "手被打到覺得痛", type: "conscious" },
+        { text: "腳踩尖物縮回", type: "reflex" },
+        { text: "看到紅燈踩剎車", type: "conscious" },
+        { text: "強光瞳孔縮小", type: "reflex" },
+        { text: "背誦英文單字", type: "conscious" },
+        { text: "異物入鼻打噴嚏", type: "reflex" },
+        { text: "舉手回答問題", type: "conscious" },
+        { text: "飛蟲飛過眨眼", type: "reflex" },
+        { text: "聞香走進餐廳", type: "conscious" },
+        { text: "敲擊膝蓋踢腿", type: "reflex" },
+        { text: "算數學題目", type: "conscious" },
+        { text: "寒冷時身體發抖", type: "reflex" },
+        { text: "接住掉落的尺", type: "conscious" },
+        { text: "吞嚥食物", type: "reflex" },
+        { text: "被蚊子叮覺得癢", type: "conscious" },
+        { text: "聽笑話大笑", type: "conscious" },
+        { text: "切洋蔥流眼淚", type: "reflex" }
+    ];
+
+    let score = 0;
+    let lives = 3;
+    let gameInterval = null;
+    let currentBubble = null;
+    let bubbleSpeed = 2;
+    let isPlaying = false;
+
+    const gameArea = document.getElementById('game-area');
+    const scoreDisplay = document.getElementById('score-display');
+    const lifeDisplay = document.getElementById('life-display');
+    const feedback = document.getElementById('feedback');
+
+    document.addEventListener('keydown', (e) => {
+        if (!isPlaying) return;
+        if (e.key === 'ArrowLeft') playerAction('reflex');
+        if (e.key === 'ArrowRight') playerAction('conscious');
+    });
+
+    function startGame() {
+        score = 0;
+        lives = 3;
+        bubbleSpeed = 2.5; // 初始速度
+        isPlaying = true;
+        
+        updateUI();
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.add('hidden');
+        
+        if (currentBubble) {
+            currentBubble.element.remove();
+            currentBubble = null;
+        }
+
+        spawnBubble();
+        if (gameInterval) clearInterval(gameInterval);
+        gameInterval = setInterval(gameLoop, 20);
+    }
+
+    function gameLoop() {
+        if (!currentBubble) return;
+
+        currentBubble.y += bubbleSpeed;
+        currentBubble.element.style.top = currentBubble.y + 'px';
+
+        const basketTop = gameArea.clientHeight - 120;
+        if (currentBubble.y > basketTop) {
+            handleMiss();
+        }
+    }
+
+    function spawnBubble() {
+        if (!isPlaying) return;
+
+        const q = questionBank[Math.floor(Math.random() * questionBank.length)];
+        const bubbleEl = document.createElement('div');
+        bubbleEl.classList.add('bubble');
+        bubbleEl.textContent = q.text;
+        
+        // --- 隨機位置修正 ---
+        // 氣泡寬度 50%，left 以中心點定位
+        // 為了不切到邊緣，範圍設在 25% 到 75% 之間
+        const randomX = Math.random() * 50 + 25; 
+        
+        bubbleEl.style.left = randomX + '%';
+        bubbleEl.style.top = '-100px'; // 從更高處落下，避免一開始遮住字
+        
+        gameArea.appendChild(bubbleEl);
+
+        currentBubble = {
+            element: bubbleEl,
+            data: q,
+            y: -100
+        };
+
+        if (score > 50) bubbleSpeed = 3.5;
+        if (score > 100) bubbleSpeed = 5;
+    }
+
+    function playerAction(choice) {
+        if (!isPlaying || !currentBubble) return;
+
+        const correctType = currentBubble.data.type;
+        const bubbleEl = currentBubble.element;
+
+        if (choice === correctType) {
+            score += 10;
+            showFeedback("⭕", "#27ae60");
+            
+            // 動畫修正：根據選擇飛向對應方向
+            if (choice === 'reflex') bubbleEl.classList.add('move-left');
+            else bubbleEl.classList.add('move-right');
+
+        } else {
+            lives--;
+            showFeedback("❌", "#c0392b");
+            bubbleEl.style.transform = "translateX(-50%) scale(0)";
+            bubbleEl.style.opacity = "0";
+        }
+
+        updateUI();
+        
+        currentBubble = null;
+        setTimeout(() => {
+            if (bubbleEl) bubbleEl.remove();
+            if (lives > 0) spawnBubble();
+            else endGame();
+        }, 300);
+    }
+
+    function handleMiss() {
+        lives--;
+        showFeedback("⚠️ Miss", "#f39c12");
+        
+        const bubbleEl = currentBubble.element;
+        currentBubble = null;
+        bubbleEl.remove();
+        
+        updateUI();
+
+        if (lives <= 0) endGame();
+        else spawnBubble();
+    }
+
+    function showFeedback(text, color) {
+        feedback.textContent = text;
+        feedback.style.color = color;
+        feedback.classList.remove('animate-feedback');
+        void feedback.offsetWidth;
+        feedback.classList.add('animate-feedback');
+    }
+
+    function updateUI() {
+        scoreDisplay.textContent = score;
+        let hearts = "";
+        for(let i=0; i<lives; i++) hearts += "❤";
+        lifeDisplay.textContent = hearts;
+    }
+
+    function endGame() {
+        isPlaying = false;
+        clearInterval(gameInterval);
+        
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-score').textContent = score;
+        
+        const title = document.getElementById('end-title');
+        const msg = document.getElementById('end-msg');
+        const nextBtn = document.getElementById('next-page-btn');
+        const lockHint = document.getElementById('lock-hint');
+
+        if (score >= 100) {
+            title.textContent = "🎉 過關！";
+            title.style.color = "#27ae60";
+            msg.textContent = "太厲害了！你已經完全掌握反射與意識的差別！";
+            nextBtn.classList.remove('disabled');
+            lockHint.style.display = 'none';
+        } else {
+            title.textContent = "再加油！";
+            title.style.color = "#e74c3c";
+            msg.textContent = "差一點點！再試一次挑戰 100 分！";
+            nextBtn.classList.add('disabled');
+            lockHint.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>

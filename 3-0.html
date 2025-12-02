@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單元 3 課前導讀：意識與反射</title>
+    <style>
+        :root {
+            --primary: #d35400;    /* 橘紅色系代表快速反應/警示 */
+            --accent: #e67e22;     /* 亮橘色重點 */
+            --highlight: #2c3e50;  /* 深色對比 */
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #fdf2e9;         /* 極淡的橘色背景 */
+            --card-bg: #ffffff;
+            --text-main: #333;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-top: 10px solid var(--primary);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        /* 圖片預留區 */
+        .img-placeholder {
+            width: 100%;
+            height: 280px;
+            background-color: #fcece6; 
+            border: 3px dashed #edbb99;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #d35400;
+            margin: 30px 0;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .img-placeholder:hover {
+            border-color: var(--primary);
+            background-color: #fadbd8;
+            transform: scale(1.01);
+        }
+
+        /* 課文區塊 */
+        .text-section {
+            font-size: 1.25rem;
+            text-align: justify;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fffbf8;
+            border-left: 5px solid var(--primary);
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        /* 下拉選單樣式 */
+        select.cloze-input {
+            font-size: 1.15rem;
+            padding: 4px 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #333;
+            font-family: inherit;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        select.cloze-input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 5px rgba(230, 126, 34, 0.3);
+        }
+
+        /* 作答回饋 */
+        select.correct {
+            border-color: var(--success);
+            background-color: #eafaf1;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        select.wrong {
+            border-color: var(--error);
+            background-color: #fdedec;
+            color: var(--error);
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .check-btn {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(211, 84, 0, 0.2);
+        }
+
+        .check-btn:hover {
+            background-color: #a04000;
+            transform: translateY(-2px);
+        }
+
+        .next-btn {
+            background-color: #27ae60; /* 綠色按鈕代表通行 */
+            color: white;
+            margin-left: 20px;
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
+            display: none;
+            animation: bounce 1s infinite;
+        }
+
+        .next-btn:hover {
+            background-color: #1e8449;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* 進度條 */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success);
+            transition: width 0.5s ease;
+        }
+        .status-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>單元 3：意識 vs. 反射</h1>
+        <p class="subtitle">主題：神經傳導途徑的比較</p>
+    </header>
+
+    <div class="text-section">
+        <h3>1. 意識行為 (Conscious Behavior)</h3>
+        <p>
+            如果神經傳導的路徑經過大腦，並由
+            <select class="cloze-input" data-answer="大腦">
+                <option value="">(選擇)</option>
+                <option value="脊髓">脊髓</option>
+                <option value="大腦">大腦</option>
+                <option value="受器">受器</option>
+            </select>
+            意識控制的反應，稱為意識行為。
+        </p>
+        <p>
+            意識行為的路徑通常較長，反應時間較
+            <select class="cloze-input" data-answer="慢">
+                <option value="">(選擇)</option>
+                <option value="快">快</option>
+                <option value="慢">慢</option>
+            </select>
+            ，但可以透過學習而變得熟練。
+        </p>
+        <p>
+            舉例：看到紅燈踩剎車、接尺實驗、感覺被蚊子叮而伸手去拍。這些行為的命令都是由大腦發出的。
+        </p>
+    </div>
+
+    <div class="img-placeholder">
+        <span style="font-size: 3rem; margin-bottom: 10px;">✋ 🔥 🧠</span>
+        [請在此處插入課本圖 4-10：反射作用與意識行為的神經傳導途徑]
+    </div>
+
+    <div class="text-section">
+        <h3>2. 反射作用 (Reflex Action)</h3>
+        <p>
+            如果不經由大腦意識控制，直接由
+            <select class="cloze-input" data-answer="脊髓">
+                <option value="">(選擇)</option>
+                <option value="大腦">大腦</option>
+                <option value="脊髓">脊髓</option>
+                <option value="心臟">心臟</option>
+            </select>
+            或腦幹發布命令所產生的反應，稱為反射作用。
+        </p>
+        <p>
+            反射作用通常具有爭取時間、保護身體免受傷害的功能。其特點是反應速率
+            <select class="cloze-input" data-answer="快">
+                <option value="">(選擇)</option>
+                <option value="快">快</option>
+                <option value="慢">慢</option>
+            </select>
+            且無法由意志控制。
+        </p>
+        <p>
+            例如：手碰到熱燙物體立刻縮回、腳踩尖物立刻縮回，這些都是由「脊髓」控制的反射。而眨眼、咳嗽、唾液分泌則是由
+            <select class="cloze-input" data-answer="腦幹">
+                <option value="">(選擇)</option>
+                <option value="大腦">大腦</option>
+                <option value="小腦">小腦</option>
+                <option value="腦幹">腦幹</option>
+            </select>
+            控制的反射。
+        </p>
+    </div>
+
+    <div class="text-section">
+        <h3>3. 縮手反射的路徑分析</h3>
+        <p>
+            當我們的手不小心碰到熱鍋時，傳導途徑如下：
+            <br>
+            皮膚(受器) ➝ 感覺神經元 ➝ 
+            <select class="cloze-input" data-answer="脊髓">
+                <option value="">(選擇)</option>
+                <option value="大腦">大腦</option>
+                <option value="脊髓">脊髓</option>
+            </select>
+            (中樞) ➝ 運動神經元 ➝ 肌肉(動器)。
+        </p>
+        <p>
+            因為訊息在脊髓就直接轉傳出去命令手縮回，沒有先繞去大腦，所以我們是「先縮手，才感覺到痛」。
+            <br>
+            痛的感覺產生是因為脊髓將訊息同時往上傳遞到了
+            <select class="cloze-input" data-answer="大腦">
+                <option value="">(選擇)</option>
+                <option value="大腦">大腦</option>
+                <option value="小腦">小腦</option>
+            </select>
+            ，但這已經是縮手之後的事了。
+        </p>
+    </div>
+
+    <div class="action-area">
+        <button class="btn check-btn" onclick="checkAnswers()">檢查答案 🔍</button>
+        <a href="unit3_full.html" class="btn next-btn" id="nextLink">進入正式課程 🚀</a>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-text" id="statusText">目前得分：0 / 7 題</div>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const inputs = document.querySelectorAll('.cloze-input');
+        let correctCount = 0;
+        const totalCount = inputs.length;
+
+        inputs.forEach(select => {
+            select.classList.remove('correct', 'wrong');
+            
+            if (select.value === "") {
+                select.classList.add('wrong');
+            } else if (select.value === select.dataset.answer) {
+                select.classList.add('correct');
+                correctCount++;
+            } else {
+                select.classList.add('wrong');
+            }
+        });
+
+        // 更新進度
+        const percentage = (correctCount / totalCount) * 100;
+        document.getElementById('progressFill').style.width = percentage + '%';
+        
+        const statusText = document.getElementById('statusText');
+        
+        if (correctCount === totalCount) {
+            statusText.textContent = "🎉 完美！你已經掌握神經傳導的關鍵了！";
+            statusText.style.color = "#27ae60";
+            statusText.style.fontWeight = "bold";
+            document.getElementById('nextLink').style.display = 'inline-block';
+        } else {
+            statusText.textContent = `加油！還有 ${totalCount - correctCount} 題需要修正。`;
+            statusText.style.color = "#c0392b";
+            // document.getElementById('nextLink').style.display = 'none'; 
+        }
+    }
+</script>
+
+</body>
+</html>

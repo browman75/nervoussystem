@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單元 1 課前導讀：身體的通訊兵</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;     /* 橘色重點 */
+            --highlight: #3498db;  /* 藍色重點 */
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        /* 圖片預留區 */
+        .img-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: #ecf0f1;
+            border: 3px dashed #bdc3c7;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            margin: 30px 0;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .img-placeholder:hover {
+            border-color: var(--highlight);
+            color: var(--highlight);
+            background-color: #eaf2f8;
+        }
+
+        /* 課文區塊 */
+        .text-section {
+            font-size: 1.25rem;
+            text-align: justify;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fcfcfc;
+            border-left: 5px solid var(--highlight);
+            border-radius: 0 10px 10px 0;
+        }
+
+        h3 {
+            color: var(--highlight);
+            margin-top: 0;
+        }
+
+        /* 下拉選單樣式 */
+        select.cloze-input {
+            font-size: 1.15rem;
+            padding: 4px 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #333;
+            font-family: inherit;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px; /* 避免選單太窄 */
+        }
+
+        select.cloze-input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 5px rgba(230, 126, 34, 0.3);
+        }
+
+        /* 作答回饋 */
+        select.correct {
+            border-color: var(--success);
+            background-color: #eafaf1;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        select.wrong {
+            border-color: var(--error);
+            background-color: #fdedec;
+            color: var(--error);
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .check-btn {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(44, 62, 80, 0.2);
+        }
+
+        .check-btn:hover {
+            background-color: #34495e;
+            transform: translateY(-2px);
+        }
+
+        .next-btn {
+            background-color: var(--accent);
+            color: white;
+            margin-left: 20px;
+            box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2);
+            display: none; /* 預設隱藏 */
+            animation: pulse 2s infinite;
+        }
+
+        .next-btn:hover {
+            background-color: #d35400;
+            transform: translateY(-2px);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 進度條 */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success);
+            transition: width 0.5s ease;
+        }
+        .status-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>單元 1：身體的通訊兵</h1>
+        <p class="subtitle">主題：刺激與反應、神經元的構造</p>
+    </header>
+
+    <div class="img-placeholder">
+        <span style="font-size: 3rem; margin-bottom: 10px;">👁️ 👂 👃</span>
+        [請在此處插入課本圖 4-1：人體的各種感覺器官]
+    </div>
+
+    <div class="text-section">
+        <h3>1. 刺激與受器</h3>
+        <p>
+            生物生活在多變的環境中，環境中的變化（如光線、聲音、溫度等）對生物體而言稱為
+            <select class="cloze-input" data-answer="刺激">
+                <option value="">(選擇)</option>
+                <option value="反應">反應</option>
+                <option value="刺激">刺激</option>
+                <option value="感覺">感覺</option>
+            </select>
+            。為了偵測這些變化，動物體內具備了特殊的構造，稱為
+            <select class="cloze-input" data-answer="受器">
+                <option value="">(選擇)</option>
+                <option value="動器">動器</option>
+                <option value="受器">受器</option>
+                <option value="神經元">神經元</option>
+            </select>
+            。
+        </p>
+        <p>
+            不同的受器負責接收不同的刺激，通常位於感覺器官中：
+            <br>● <strong>眼睛</strong>內的受器可感受
+            <select class="cloze-input" data-answer="光線">
+                <option value="">(選擇)</option>
+                <option value="光線">光線</option>
+                <option value="聲音">聲音</option>
+                <option value="化學物質">化學物質</option>
+            </select>
+            。
+            <br>● <strong>耳朵</strong>內的受器可感受
+            <select class="cloze-input" data-answer="聲音">
+                <option value="">(選擇)</option>
+                <option value="平衡">平衡</option>
+                <option value="聲音">聲音</option>
+                <option value="壓力">壓力</option>
+            </select>
+            。
+            <br>● <strong>鼻</strong>與<strong>舌</strong>分別負責接收氣味與
+            <select class="cloze-input" data-answer="味道">
+                <option value="">(選擇)</option>
+                <option value="溫度">溫度</option>
+                <option value="味道">味道</option>
+                <option value="觸覺">觸覺</option>
+            </select>
+            的刺激。
+            <br>● <strong>皮膚</strong>則含有多種受器，可以偵測接觸、
+            <select class="cloze-input" data-answer="溫度">
+                <option value="">(選擇)</option>
+                <option value="光線">光線</option>
+                <option value="溫度">溫度</option>
+                <option value="聲波">聲波</option>
+            </select>
+            以及壓力等。
+        </p>
+    </div>
+
+    <div class="text-section">
+        <h3>2. 反應與動器</h3>
+        <p>
+            當受器接收到刺激後，訊息會經由神經系統傳遞到中樞，再由中樞發出命令傳送到
+            <select class="cloze-input" data-answer="動器">
+                <option value="">(選擇)</option>
+                <option value="受器">受器</option>
+                <option value="動器">動器</option>
+                <option value="大腦">大腦</option>
+            </select>
+            以產生適當的行為，這個過程稱為反應。
+        </p>
+        <p>
+            人體的動器主要包含兩類：
+            <br>1. 能產生動作的
+            <select class="cloze-input" data-answer="肌肉">
+                <option value="">(選擇)</option>
+                <option value="骨骼">骨骼</option>
+                <option value="肌肉">肌肉</option>
+                <option value="關節">關節</option>
+            </select>
+            （如：揮手、奔跑）。
+            <br>2. 能分泌化學物質的
+            <select class="cloze-input" data-answer="腺體">
+                <option value="">(選擇)</option>
+                <option value="器官">器官</option>
+                <option value="組織">組織</option>
+                <option value="腺體">腺體</option>
+            </select>
+            （如：流汗、流口水）。
+        </p>
+    </div>
+
+    <div class="img-placeholder">
+        <span style="font-size: 3rem; margin-bottom: 10px;">🧬</span>
+        [請在此處插入課本圖 4-3：神經元的構造模式圖]
+    </div>
+
+    <div class="text-section">
+        <h3>3. 神經系統的基本單位</h3>
+        <p>
+            神經系統主要由神經細胞組成，又稱為
+            <select class="cloze-input" data-answer="神經元">
+                <option value="">(選擇)</option>
+                <option value="神經元">神經元</option>
+                <option value="神經節">神經節</option>
+                <option value="神經束">神經束</option>
+            </select>
+            。它的外形獨特，包含兩個主要部分：
+        </p>
+        <p>
+            ● <strong>細胞本體</strong>：位於神經元的中心，含有
+            <select class="cloze-input" data-answer="細胞核">
+                <option value="">(選擇)</option>
+                <option value="液泡">液泡</option>
+                <option value="細胞核">細胞核</option>
+                <option value="葉綠體">葉綠體</option>
+            </select>
+            ，主要負責維持細胞的生長與
+            <select class="cloze-input" data-answer="代謝">
+                <option value="">(選擇)</option>
+                <option value="運動">運動</option>
+                <option value="代謝">代謝</option>
+                <option value="感覺">感覺</option>
+            </select>
+            。
+            <br>
+            ● <strong>神經纖維</strong>：由細胞本體向外延伸出的突起，功能就像是電話線一樣，專門負責
+            <select class="cloze-input" data-answer="傳遞訊息">
+                <option value="">(選擇)</option>
+                <option value="製造養分">製造養分</option>
+                <option value="傳遞訊息">傳遞訊息</option>
+                <option value="儲存脂肪">儲存脂肪</option>
+            </select>
+            。
+        </p>
+    </div>
+
+    <div class="action-area">
+        <button class="btn check-btn" onclick="checkAnswers()">檢查答案 🔍</button>
+        <a href="unit1_full.html" class="btn next-btn" id="nextLink">進入正式課程 🚀</a>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-text" id="statusText">目前得分：0 / 11 題</div>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const inputs = document.querySelectorAll('.cloze-input');
+        let correctCount = 0;
+        const totalCount = inputs.length;
+
+        inputs.forEach(select => {
+            // 清除之前的狀態
+            select.classList.remove('correct', 'wrong');
+            
+            if (select.value === "") {
+                // 未作答
+                select.classList.add('wrong');
+            } else if (select.value === select.dataset.answer) {
+                // 答對
+                select.classList.add('correct');
+                correctCount++;
+            } else {
+                // 答錯
+                select.classList.add('wrong');
+            }
+        });
+
+        // 更新進度條與文字
+        const percentage = (correctCount / totalCount) * 100;
+        document.getElementById('progressFill').style.width = percentage + '%';
+        
+        const statusText = document.getElementById('statusText');
+        
+        if (correctCount === totalCount) {
+            statusText.textContent = "🎉 全對了！太棒了！請點擊右方按鈕進入正式課程。";
+            statusText.style.color = "#27ae60";
+            statusText.style.fontWeight = "bold";
+            
+            // 顯示下一頁按鈕
+            document.getElementById('nextLink').style.display = 'inline-block';
+        } else {
+            statusText.textContent = `加油！目前答對 ${correctCount} / ${totalCount} 題，紅色的地方再試試看！`;
+            statusText.style.color = "#c0392b";
+            // 隱藏下一頁按鈕（如果之前顯示過，現在答錯要隱藏嗎？通常不用，但嚴格來說可以隱藏）
+            // document.getElementById('nextLink').style.display = 'none'; 
+        }
+    }
+</script>
+
+</body>
+</html>

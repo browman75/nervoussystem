@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單元 2：指揮總部 - 國中生物自學網</title>
+    <style>
+        :root {
+            --primary-color: #8e44ad; /* 紫色系代表神經中樞 */
+            --accent-color: #9b59b6;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --light-accent: #f5eef8;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 2.2rem; }
+        header p { opacity: 0.9; font-size: 1.1rem; margin-top: 10px; }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        h3 { color: var(--accent-color); margin-top: 25px; }
+
+        /* --- 練習題區塊樣式 --- */
+        .practice-box {
+            background-color: var(--light-accent);
+            border: 2px solid #d7bde2;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .practice-box.solved {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+
+        .practice-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .practice-feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .btn-check {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .btn-check:hover { background-color: #71368a; }
+        
+        .btn-disabled {
+            background-color: #95a5a6;
+            cursor: default;
+        }
+
+        /* --- 互動腦部圖 (SVG) --- */
+        .brain-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .brain-part {
+            fill: #ecf0f1;
+            stroke: #7f8c8d;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        /* 大腦 hover */
+        .brain-part.cerebrum:hover { fill: #f1948a; stroke: #c0392b; }
+        /* 小腦 hover */
+        .brain-part.cerebellum:hover { fill: #f7dc6f; stroke: #d4ac0d; }
+        /* 腦幹 hover */
+        .brain-part.brainstem:hover { fill: #85c1e9; stroke: #2980b9; }
+
+        .info-panel {
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* --- 總測驗樣式 --- */
+        .quiz-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fafafa; }
+        .question { margin-bottom: 20px; }
+        .options label { display: block; margin: 5px 0; cursor: pointer; padding: 8px; border-radius: 4px; transition: background 0.2s; }
+        .options label:hover { background: #eee; }
+        .feedback-text { font-weight: bold; margin-left: 10px; }
+        .correct { color: var(--success-color); }
+        .wrong { color: #c0392b; }
+
+        button.submit-btn {
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px;
+            width: 100%; margin-top: 10px;
+        }
+        button.submit-btn:hover { background-color: #8e44ad; }
+
+        /* --- 底部導覽列 --- */
+        .navigation-footer {
+            text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd;
+        }
+        .nav-btn {
+            display: inline-block; padding: 15px 40px; font-size: 1.2rem; text-decoration: none;
+            border-radius: 50px; font-weight: bold; transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .nav-btn.disabled { background-color: #bdc3c7; color: #7f8c8d; cursor: not-allowed; pointer-events: none; }
+        .nav-btn.enabled { background-color: var(--warning-color); color: white; cursor: pointer; pointer-events: auto; animation: bounce 1s; }
+        .nav-btn.enabled:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(230, 126, 34, 0.3); background-color: #d35400; }
+        .lock-hint { margin-top: 10px; color: #7f8c8d; font-size: 0.9rem; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>生物的協調作用</h1>
+    <p>單元 2：指揮總部 (中樞神經系統)</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>什麼是「中樞神經系統」？</h2>
+        <p>如果說神經元是通訊兵，那「中樞神經系統」就是身體的最高指揮總部！它負責接收來自全身的訊息，經過判斷處理後，發出命令指揮身體運作。</p>
+        <p><strong>中樞神經系統</strong>包含兩個主要部分：</p>
+        <ul>
+            <li><strong>腦 (Brain)</strong>：位於頭骨內，分區負責不同功能。</li>
+            <li><strong>脊髓 (Spinal Cord)</strong>：位於脊椎骨內，是腦與身體軀幹之間的聯絡通道。</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>一、 腦的構造與功能</h2>
+        <p>人的腦非常發達，依構造與功能可分為三個主要區域。請點擊下圖的不同區塊來認識它們！</p>
+        
+        <div class="brain-container">
+            <svg viewBox="0 0 300 250">
+                <path d="M50,250 L50,150 Q50,50 150,50 Q250,50 250,150 L250,250 Z" fill="#eee" opacity="0.3"/>
+                
+                <path class="brain-part cerebrum" d="M80,150 Q80,60 180,60 Q240,60 240,150 Q240,170 160,170 Q100,170 80,150" 
+                      onmouseover="showInfo('大腦：掌管感覺、運動、語言、記憶、思考等意識行為。')" />
+                
+                <path class="brain-part cerebellum" d="M170,175 Q240,175 240,210 Q240,230 180,230 Q160,230 170,175" 
+                      onmouseover="showInfo('小腦：負責協調全身肌肉活動，維持身體平衡。')" />
+                
+                <path class="brain-part brainstem" d="M130,170 L130,240 L160,240 L160,175 Q145,170 130,170" 
+                      onmouseover="showInfo('腦幹：控制呼吸、心搏等生命現象，又稱為「生命中樞」。')" />
+                
+                <text x="140" y="110" font-size="14" fill="#555" pointer-events="none">大腦</text>
+                <text x="200" y="210" font-size="14" fill="#555" pointer-events="none">小腦</text>
+                <text x="100" y="220" font-size="14" fill="#555" pointer-events="none">腦幹</text>
+            </svg>
+            <div id="brain-info" class="info-panel">請將滑鼠移至腦部各區域查看功能</div>
+        </div>
+
+        <div class="highlight-box" style="background:#fef9e7; padding:15px; border-left:4px solid #f1c40f; margin-top:20px;">
+            <strong>功能速記：</strong>
+            <ul>
+                <li>大腦 ➔ 思考、意識、感覺</li>
+                <li>小腦 ➔ 平衡、動作協調</li>
+                <li>腦幹 ➔ 呼吸、心跳 (生命中樞)</li>
+            </ul>
+        </div>
+
+        <div class="practice-box" id="practice-box-1" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 1</div>
+            <p>體操選手在走平衡木時，身體能保持良好的平衡而不掉下來，主要是哪一個部位發達？</p>
+            <div class="options">
+                <label><input type="radio" name="p1" value="A"> (A) 大腦</label>
+                <label><input type="radio" name="p1" value="B"> (B) 小腦</label>
+                <label><input type="radio" name="p1" value="C"> (C) 腦幹</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice1(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p1"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>二、 訊息的高速公路：脊髓 (Spinal Cord)</h2>
+        <p>脊髓位於我們的脊椎骨內，是一條長長的管狀神經束。</p>
+        
+        <h3>脊髓的兩大功能：</h3>
+        <ol>
+            <li><strong>傳導功能</strong>：它是腦部與身體軀幹、四肢之間的聯絡通道。就像高速公路一樣，將身體的訊息傳給腦，並將腦的命令傳給身體。</li>
+            <li><strong>反射中樞</strong>：負責控制四肢與軀幹的反射動作（例如：手碰到熱鍋縮回）。</li>
+        </ol>
+
+        <p style="color: #c0392b; font-size: 0.9em;">⚠️ <strong>注意：</strong> 如果脊髓受損，受傷部位以下的肢體可能會失去感覺（無法傳入）或癱瘓（無法傳出），甚至大小便失禁。</p>
+
+        <div class="practice-box" id="practice-box-2" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 2</div>
+            <p>下列關於「脊髓」的敘述，哪一項是正確的？</p>
+            <div class="options">
+                <label><input type="radio" name="p2" value="A"> (A) 負責記憶背誦</label>
+                <label><input type="radio" name="p2" value="B"> (B) 控制心跳與呼吸</label>
+                <label><input type="radio" name="p2" value="C"> (C) 傳導腦與軀幹之間的訊息</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice2(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p2"></div>
+        </div>
+    </div>
+
+    <div class="card" id="final-quiz-card">
+        <h2>🧠 形成性評量 (總測驗)</h2>
+        <p>請完成最後的總複習測驗，證明你已經是可以獨當一面的指揮官了！</p>
+        <div class="quiz-container">
+            <div class="question">
+                <p><strong>1. 被稱為「生命中樞」，如果受損可能會立即危及生命（如呼吸停止）的是哪個部位？</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> (A) 大腦</label>
+                    <label><input type="radio" name="q1" value="B"> (B) 腦幹</label>
+                    <label><input type="radio" name="q1" value="C"> (C) 小腦</label>
+                </div>
+                <div class="feedback-text" id="fb-q1"></div>
+            </div>
+
+            <div class="question">
+                <p><strong>2. 植物人通常是指大腦受損，無意識但仍有呼吸心跳。這代表他的哪個部位功能還是正常的？</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> (A) 腦幹</label>
+                    <label><input type="radio" name="q2" value="B"> (B) 小腦</label>
+                    <label><input type="radio" name="q2" value="C"> (C) 脊髓</label>
+                </div>
+                <div class="feedback-text" id="fb-q2"></div>
+            </div>
+
+            <button class="submit-btn" onclick="checkFinalQuiz()">送出試卷</button>
+        </div>
+    </div>
+
+    <div class="navigation-footer">
+        <a href="" id="next-link" class="nav-btn disabled">前往下一頁：意識與反射</a>
+        <p class="lock-hint" id="lock-msg">🔒 請完成所有小練習與總測驗才能前往下一頁</p>
+    </div>
+
+</div>
+
+<script>
+    // --- 互動功能: 腦部資訊顯示 ---
+    function showInfo(text) {
+        document.getElementById('brain-info').textContent = text;
+    }
+
+    // --- 全域進度追蹤 ---
+    let progress = {
+        p1: false,
+        p2: false,
+        final: false
+    };
+
+    function updateGlobalState() {
+        const nextLink = document.getElementById('next-link');
+        const lockMsg = document.getElementById('lock-msg');
+        
+        // 檢查是否全部完成
+        const allDone = progress.p1 && progress.p2 && progress.final;
+
+        if (allDone) {
+            nextLink.classList.remove('disabled');
+            nextLink.classList.add('enabled');
+            lockMsg.innerHTML = "🎉 太棒了！指揮總部已就位，準備進入下一關！";
+            lockMsg.style.color = "#27ae60";
+        }
+    }
+
+    // --- 隨堂小練習 1 ---
+    function checkPractice1(btn) {
+        const selected = document.querySelector('input[name="p1"]:checked');
+        const feedback = document.getElementById('fb-p1');
+        const box = document.getElementById('practice-box-1');
+
+        feedback.style.display = 'block';
+        if (selected && selected.value === 'B') {
+            feedback.innerHTML = "<span class='correct'>✅ 答對了！小腦負責平衡與協調。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p1 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 答錯囉。大腦管思考，腦幹管生命，平衡是...？</span>";
+        }
+    }
+
+    // --- 隨堂小練習 2 ---
+    function checkPractice2(btn) {
+        const selected = document.querySelector('input[name="p2"]:checked');
+        const feedback = document.getElementById('fb-p2');
+        const box = document.getElementById('practice-box-2');
+
+        feedback.style.display = 'block';
+        if (selected && selected.value === 'C') {
+            feedback.innerHTML = "<span class='correct'>✅ 正確！脊髓是身體與腦之間的傳導通道。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p2 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 錯誤。(A)是大腦的功能，(B)是腦幹的功能。</span>";
+        }
+    }
+
+    // --- 總測驗檢查 ---
+    function checkFinalQuiz() {
+        // Q1 檢查 (生命中樞 -> 腦幹 B)
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const fb1 = document.getElementById('fb-q1');
+        let q1Correct = false;
+        
+        if (q1) {
+            if (q1.value === 'B') {
+                fb1.innerHTML = "<span class='correct'>✅ 正確</span>";
+                q1Correct = true;
+            } else {
+                fb1.innerHTML = "<span class='wrong'>❌ 錯誤 (腦幹才是生命中樞)</span>";
+            }
+        } else {
+            fb1.innerHTML = "<span class='wrong'>⚠️ 請作答</span>";
+        }
+
+        // Q2 檢查 (植物人 -> 腦幹正常 A)
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const fb2 = document.getElementById('fb-q2');
+        let q2Correct = false;
+
+        if (q2) {
+            if (q2.value === 'A') {
+                fb2.innerHTML = "<span class='correct'>✅ 正確 (還有呼吸心跳代表腦幹沒壞)</span>";
+                q2Correct = true;
+            } else {
+                fb2.innerHTML = "<span class='wrong'>❌ 錯誤 (小腦管平衡，脊髓管傳導)</span>";
+            }
+        } else {
+            fb2.innerHTML = "<span class='wrong'>⚠️ 請作答</span>";
+        }
+
+        // 檢查是否全部通過
+        if (q1Correct && q2Correct) {
+            progress.final = true;
+            // 鎖定按鈕
+            document.querySelector('.submit-btn').textContent = "已完成測驗";
+            document.querySelector('.submit-btn').style.background = "#27ae60";
+            document.querySelector('.submit-btn').disabled = true;
+            updateGlobalState();
+        } else {
+            progress.final = false;
+        }
+    }
+</script>
+
+</body>
+</html>

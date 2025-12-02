@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單元 1：身體的通訊兵 - 國中生物自學網</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --light-accent: #e8f4fd;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 2.2rem; }
+        header p { opacity: 0.9; font-size: 1.1rem; margin-top: 10px; }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h2 {
+            color: var(--accent-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* --- 練習題區塊樣式 (Mini Practice) --- */
+        .practice-box {
+            background-color: var(--light-accent);
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .practice-box.solved {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+
+        .practice-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .practice-feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .btn-check {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .btn-check:hover { background-color: #34495e; }
+        
+        .btn-disabled {
+            background-color: #95a5a6;
+            cursor: default;
+        }
+
+        /* --- 互動圖片樣式 --- */
+        .interactive-area {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background-color: #f9f9f9;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 簡單的人形幾何繪圖 */
+        .human-figure { position: relative; width: 120px; height: 300px; }
+        .head { width: 60px; height: 70px; background: #ffccaa; border-radius: 30px; position: absolute; top: 0; left: 30px; z-index: 2; }
+        .body { width: 80px; height: 120px; background: #88ccff; border-radius: 10px; position: absolute; top: 75px; left: 20px; z-index: 1; }
+        .arm-l, .arm-r { width: 20px; height: 100px; background: #ffccaa; border-radius: 10px; position: absolute; top: 75px; }
+        .arm-l { left: -5px; } .arm-r { right: -5px; }
+        .leg-l, .leg-r { width: 25px; height: 100px; background: #555; border-radius: 10px; position: absolute; top: 190px; }
+        .leg-l { left: 25px; } .leg-r { right: 25px; }
+
+        .hotspot {
+            position: absolute; width: 24px; height: 24px; background: #e74c3c;
+            border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer; animation: pulse 2s infinite; z-index: 10;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: white; font-size: 12px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+        .info-panel {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.95); color: white; padding: 15px;
+            border-radius: 8px; width: 80%; text-align: center; display: none; z-index: 100;
+        }
+
+        /* SVG Neuron */
+        .neuron-svg { width: 100%; height: 100%; max-width: 600px; }
+        .neuron-part { fill: #ecf0f1; stroke: #2c3e50; stroke-width: 3; transition: all 0.3s ease; cursor: pointer; }
+        .neuron-part:hover { fill: #f1c40f; stroke: #f39c12; }
+        .neuron-label { font-size: 14px; font-weight: bold; fill: #2c3e50; pointer-events: none; }
+
+        /* --- 總測驗樣式 --- */
+        .quiz-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fafafa; }
+        .question { margin-bottom: 20px; }
+        .options label { display: block; margin: 5px 0; cursor: pointer; padding: 8px; border-radius: 4px; transition: background 0.2s; }
+        .options label:hover { background: #eee; }
+        
+        .feedback-text { font-weight: bold; margin-left: 10px; }
+        .correct { color: var(--success-color); }
+        .wrong { color: #c0392b; }
+
+        button.submit-btn {
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px;
+            width: 100%; margin-top: 10px;
+        }
+        button.submit-btn:hover { background-color: #2980b9; }
+
+        /* --- 底部導覽列 --- */
+        .navigation-footer {
+            text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd;
+        }
+        .nav-btn {
+            display: inline-block; padding: 15px 40px; font-size: 1.2rem; text-decoration: none;
+            border-radius: 50px; font-weight: bold; transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .nav-btn.disabled { background-color: #bdc3c7; color: #7f8c8d; cursor: not-allowed; pointer-events: none; }
+        .nav-btn.enabled { background-color: var(--warning-color); color: white; cursor: pointer; pointer-events: auto; animation: bounce 1s; }
+        .nav-btn.enabled:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(230, 126, 34, 0.3); background-color: #d35400; }
+        .lock-hint { margin-top: 10px; color: #7f8c8d; font-size: 0.9rem; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>生物的協調作用</h1>
+    <p>單元 1：身體的通訊兵 (刺激與神經元)</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>導言：為什麼我們需要「感覺」？</h2>
+        <p>生物為了求生存，必須準確接收環境中的各種變化（刺激），並且協調身體各部位做出適當的反應。這就像身體裡有一支訓練有素的軍隊，隨時偵測敵情並傳遞情報，讓我們能安全地生活。</p>
+    </div>
+
+    <div class="card">
+        <h2>一、 接收訊息的雷達：受器 (Receptors)</h2>
+        <p>為了感知環境的變化，動物體內擁有特殊的「受器」。點擊下圖中的紅點，看看各種受器的功能！</p>
+        
+        <div class="interactive-area">
+            <div class="human-figure">
+                <div class="head"></div>
+                <div class="body"></div>
+                <div class="arm-l"></div><div class="arm-r"></div>
+                <div class="leg-l"></div><div class="leg-r"></div>
+                <div class="hotspot" style="top: 20px; left: 35px;" onclick="showInfo('眼：感受光線刺激')">1</div>
+                <div class="hotspot" style="top: 35px; left: 25px;" onclick="showInfo('耳：感受聲音刺激')">2</div>
+                <div class="hotspot" style="top: 40px; left: 45px;" onclick="showInfo('鼻：感受氣味刺激')">3</div>
+                <div class="hotspot" style="top: 55px; left: 45px;" onclick="showInfo('舌：感受味道刺激')">4</div>
+                <div class="hotspot" style="top: 110px; right: -15px;" onclick="showInfo('皮膚：感受溫度、接觸及壓力')">5</div>
+            </div>
+            <div id="receptor-info" class="info-panel"></div>
+        </div>
+
+        <div class="practice-box" id="practice-box-1" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 1</div>
+            <p>下列哪些部位含有「受器」？(請勾選出所有正確答案)</p>
+            <div class="options">
+                <label><input type="checkbox" name="p1" value="eye"> 眼睛</label>
+                <label><input type="checkbox" name="p1" value="muscle"> 肌肉</label>
+                <label><input type="checkbox" name="p1" value="skin"> 皮膚</label>
+                <label><input type="checkbox" name="p1" value="ear"> 耳朵</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice1(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p1"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>二、 執行命令的士兵：動器 (Effectors)</h2>
+        <p>當受器收到刺激後，訊息會傳送到「動器」來產生反應。人體的動器主要分為兩類：</p>
+        <ul>
+            <li><strong>肌肉</strong>：負責產生動作（例：轉頭、跑步）。</li>
+            <li><strong>腺體</strong>：負責產生分泌物（例：流汗、分泌唾液）。</li>
+        </ul>
+
+        <div class="practice-box" id="practice-box-2" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 2</div>
+            <p>當你感覺很熱而開始「流汗」時，請問主要是哪個「動器」在運作？</p>
+            <div class="options">
+                <label><input type="radio" name="p2" value="A"> (A) 皮膚表面的毛髮</label>
+                <label><input type="radio" name="p2" value="B"> (B) 汗腺</label>
+                <label><input type="radio" name="p2" value="C"> (C) 大腦</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice2(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p2"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>三、 傳遞軍情的線路：神經元 (Neurons)</h2>
+        <p>神經元（神經細胞）是傳遞訊息的基本單位。滑鼠移到不同部位可查看說明：</p>
+
+        <div class="interactive-area" style="background: white; border: none;">
+            <svg class="neuron-svg" viewBox="0 0 400 200">
+                <path d="M120,100 Q200,100 350,100" stroke="#2c3e50" stroke-width="15" fill="none" stroke-linecap="round"/>
+                <rect class="neuron-part" x="140" y="90" width="40" height="20" rx="5" onmouseover="showNeuronInfo('神經纖維', '向外延伸，負責傳遞訊息')" onmouseout="hideNeuronInfo()"/>
+                <rect class="neuron-part" x="200" y="90" width="40" height="20" rx="5" onmouseover="showNeuronInfo('神經纖維', '向外延伸，負責傳遞訊息')" onmouseout="hideNeuronInfo()"/>
+                <path class="neuron-part" d="M80,100 L60,70 L90,60 L100,30 L120,60 L150,70 L130,100 L150,130 L120,140 L100,170 L90,140 L60,130 Z" transform="translate(-20,0)" onmouseover="showNeuronInfo('細胞本體', '含細胞核，負責生長與代謝')" onmouseout="hideNeuronInfo()"/>
+                <circle cx="80" cy="100" r="10" fill="#333" pointer-events="none"/>
+                <text x="60" y="190" class="neuron-label">細胞本體</text>
+                <text x="220" y="150" class="neuron-label">神經纖維</text>
+            </svg>
+            <div id="neuron-info" class="info-panel" style="bottom: 10px;"></div>
+        </div>
+
+        <div class="practice-box" id="practice-box-3" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 3</div>
+            <p>神經元中，含有細胞核並且負責「維持細胞生長與代謝」的部位是？</p>
+            <div class="options">
+                <label><input type="radio" name="p3" value="A"> (A) 神經纖維</label>
+                <label><input type="radio" name="p3" value="B"> (B) 細胞本體</label>
+                <label><input type="radio" name="p3" value="C"> (C) 髓鞘</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice3(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p3"></div>
+        </div>
+    </div>
+
+    <div class="card" id="final-quiz-card">
+        <h2>🧠 形成性評量 (總測驗)</h2>
+        <p>恭喜完成學習！請完成最後測驗以解鎖下一頁。</p>
+        <div class="quiz-container">
+            <div class="question">
+                <p><strong>1. 當你手碰到冰塊覺得冷，是哪個器官的受器在運作？</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> (A) 肌肉</label>
+                    <label><input type="radio" name="q1" value="B"> (B) 皮膚</label>
+                    <label><input type="radio" name="q1" value="C"> (C) 脊髓</label>
+                </div>
+                <div class="feedback-text" id="fb-q1"></div>
+            </div>
+
+            <div class="question">
+                <p><strong>2. 神經元中，負責「傳遞訊息」的構造是什麼？</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> (A) 細胞核</label>
+                    <label><input type="radio" name="q2" value="B"> (B) 細胞本體</label>
+                    <label><input type="radio" name="q2" value="C"> (C) 神經纖維</label>
+                </div>
+                <div class="feedback-text" id="fb-q2"></div>
+            </div>
+
+            <button class="submit-btn" onclick="checkFinalQuiz()">送出試卷</button>
+        </div>
+    </div>
+
+    <div class="navigation-footer">
+        <a href="" id="next-link" class="nav-btn disabled">前往下一頁：指揮總部</a>
+        <p class="lock-hint" id="lock-msg">🔒 請完成所有小練習與總測驗才能前往下一頁</p>
+    </div>
+
+</div>
+
+<script>
+    // --- 互動功能 ---
+    function showInfo(text) {
+        const panel = document.getElementById('receptor-info');
+        panel.textContent = text;
+        panel.style.display = 'block';
+        setTimeout(() => { panel.style.display = 'none'; }, 2500);
+    }
+
+    function showNeuronInfo(title, desc) {
+        const panel = document.getElementById('neuron-info');
+        panel.innerHTML = `<strong>${title}</strong><br>${desc}`;
+        panel.style.display = 'block';
+    }
+    function hideNeuronInfo() {
+        document.getElementById('neuron-info').style.display = 'none';
+    }
+
+    // --- 檢查全域狀態 ---
+    let progress = {
+        p1: false,
+        p2: false,
+        p3: false,
+        final: false
+    };
+
+    function updateGlobalState() {
+        const nextLink = document.getElementById('next-link');
+        const lockMsg = document.getElementById('lock-msg');
+        
+        // 檢查是否所有項目都已完成 (True)
+        const allDone = progress.p1 && progress.p2 && progress.p3 && progress.final;
+
+        if (allDone) {
+            nextLink.classList.remove('disabled');
+            nextLink.classList.add('enabled');
+            lockMsg.innerHTML = "🎉 恭喜！你已掌握本單元所有重點，出發去下一站吧！";
+            lockMsg.style.color = "#27ae60";
+        }
+    }
+
+    // --- 隨堂小練習 1 (複選) ---
+    function checkPractice1(btn) {
+        const checkboxes = document.querySelectorAll('input[name="p1"]:checked');
+        const feedback = document.getElementById('fb-p1');
+        const box = document.getElementById('practice-box-1');
+        
+        let values = [];
+        checkboxes.forEach((cb) => values.push(cb.value));
+        
+        // 正確答案: eye, skin, ear (muscle 是動器)
+        const correct = values.includes('eye') && values.includes('skin') && values.includes('ear') && !values.includes('muscle') && values.length === 3;
+
+        feedback.style.display = 'block';
+        if (correct) {
+            feedback.innerHTML = "<span class='correct'>✅ 答對了！眼睛、耳朵、皮膚都含有受器。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p1 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 答錯囉。提示：肌肉屬於「動器」，不是受器喔！</span>";
+        }
+    }
+
+    // --- 隨堂小練習 2 (單選) ---
+    function checkPractice2(btn) {
+        const selected = document.querySelector('input[name="p2"]:checked');
+        const feedback = document.getElementById('fb-p2');
+        const box = document.getElementById('practice-box-2');
+
+        feedback.style.display = 'block';
+        if (selected && selected.value === 'B') {
+            feedback.innerHTML = "<span class='correct'>✅ 答對了！汗腺屬於腺體，是動器的一種。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p2 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 再想想！動器包含肌肉和腺體。</span>";
+        }
+    }
+
+    // --- 隨堂小練習 3 (單選) ---
+    function checkPractice3(btn) {
+        const selected = document.querySelector('input[name="p3"]:checked');
+        const feedback = document.getElementById('fb-p3');
+        const box = document.getElementById('practice-box-3');
+
+        feedback.style.display = 'block';
+        if (selected && selected.value === 'B') {
+            feedback.innerHTML = "<span class='correct'>✅ 正確！細胞本體含有細胞核，負責代謝。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p3 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 答錯囉。提示：神經纖維是負責傳遞的。</span>";
+        }
+    }
+
+    // --- 總測驗檢查 ---
+    function checkFinalQuiz() {
+        // Q1
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const fb1 = document.getElementById('fb-q1');
+        let q1Correct = false;
+        
+        if (q1) {
+            if (q1.value === 'B') {
+                fb1.innerHTML = "<span class='correct'>✅ 正確</span>";
+                q1Correct = true;
+            } else {
+                fb1.innerHTML = "<span class='wrong'>❌ 錯誤 (肌肉是動器)</span>";
+            }
+        } else {
+            fb1.innerHTML = "<span class='wrong'>⚠️ 請作答</span>";
+        }
+
+        // Q2
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const fb2 = document.getElementById('fb-q2');
+        let q2Correct = false;
+
+        if (q2) {
+            if (q2.value === 'C') {
+                fb2.innerHTML = "<span class='correct'>✅ 正確</span>";
+                q2Correct = true;
+            } else {
+                fb2.innerHTML = "<span class='wrong'>❌ 錯誤 (細胞本體負責代謝)</span>";
+            }
+        } else {
+            fb2.innerHTML = "<span class='wrong'>⚠️ 請作答</span>";
+        }
+
+        // Check if passed
+        if (q1Correct && q2Correct) {
+            progress.final = true;
+            // 鎖定按鈕防止重複提交
+            document.querySelector('.submit-btn').textContent = "已完成測驗";
+            document.querySelector('.submit-btn').style.background = "#27ae60";
+            document.querySelector('.submit-btn').disabled = true;
+            updateGlobalState();
+        } else {
+            progress.final = false;
+        }
+    }
+</script>
+
+</body>
+</html>

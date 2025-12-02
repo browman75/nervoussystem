@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中樞神經配對遊戲：指揮官是誰？</title>
+    <style>
+        :root {
+            --cerebrum-color: #e91e63; /* 大腦紅 */
+            --cerebellum-color: #f39c12; /* 小腦橘 */
+            --brainstem-color: #3498db; /* 腦幹藍 */
+            --spinal-color: #2ecc71;   /* 脊髓綠 */
+            --bg-color: #f0f3f4;
+            --card-bg: #fff;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- 頂部資訊列 --- */
+        header {
+            width: 100%;
+            padding: 15px 0;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .timer-box { font-weight: bold; color: #f1c40f; }
+        .score-box { font-weight: bold; }
+
+        /* --- 遊戲主區域 (三欄式) --- */
+        .game-container {
+            display: flex;
+            width: 95%;
+            max-width: 1000px;
+            height: 80%;
+            margin-top: 20px;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* 左側：題目卡 */
+        .question-area {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-left: 10px solid #bdc3c7;
+            transition: all 0.3s;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+        
+        .question-label {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        /* 中間：選項按鈕 */
+        .options-area {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-option {
+            padding: 20px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-option:active { transform: scale(0.95); }
+        .btn-option:hover { opacity: 0.9; }
+
+        .btn-cerebrum { background-color: var(--cerebrum-color); }
+        .btn-cerebellum { background-color: var(--cerebellum-color); }
+        .btn-brainstem { background-color: var(--brainstem-color); }
+        .btn-spinal { background-color: var(--spinal-color); }
+
+        /* 右側：腦部示意圖 */
+        .visual-area {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .brain-svg {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
+        }
+        .brain-part {
+            fill: #e0e0e0;
+            stroke: #7f8c8d;
+            stroke-width: 2;
+            transition: fill 0.3s ease;
+        }
+        
+        /* 激活動畫類別 */
+        .active-cerebrum { fill: var(--cerebrum-color) !important; filter: drop-shadow(0 0 10px var(--cerebrum-color)); }
+        .active-cerebellum { fill: var(--cerebellum-color) !important; filter: drop-shadow(0 0 10px var(--cerebellum-color)); }
+        .active-brainstem { fill: var(--brainstem-color) !important; filter: drop-shadow(0 0 10px var(--brainstem-color)); }
+        .active-spinal { fill: var(--spinal-color) !important; filter: drop-shadow(0 0 10px var(--spinal-color)); }
+
+        /* 回饋遮罩 */
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            font-weight: bold;
+            border-radius: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .correct-overlay { color: var(--spinal-color); }
+        .wrong-overlay { color: #c0392b; }
+
+        /* --- 開始與結束畫面 --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+        }
+        .modal h1 { font-size: 3rem; margin-bottom: 20px; color: #f1c40f; }
+        .modal p { font-size: 1.2rem; margin-bottom: 30px; max-width: 600px; text-align: center; line-height: 1.6; }
+        
+        .btn-group {
+            display: flex;
+            gap: 20px;
+        }
+
+        .start-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+            transition: transform 0.2s;
+        }
+        .start-btn:hover { transform: scale(1.05); }
+
+        /* 下一頁按鈕樣式 */
+        .next-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.6);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .next-btn:hover { transform: scale(1.05); background: #219150; }
+        
+        /* 鎖定狀態 */
+        .next-btn.disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="timer-box">⏱️ 剩餘時間: <span id="time-display">60</span> 秒</div>
+        <div>中樞神經配對大作戰</div>
+        <div class="score-box">⭐ 得分: <span id="score-display">0</span></div>
+    </header>
+
+    <div class="game-container">
+        <div class="question-area" id="question-card">
+            <div class="question-label">請判斷下列情境由誰負責：</div>
+            <div class="question-text" id="question-text">準備中...</div>
+            <div class="overlay" id="feedback-overlay"></div>
+        </div>
+
+        <div class="options-area">
+            <button class="btn-option btn-cerebrum" onclick="handleAnswer('cerebrum')">大腦 (意識/思考)</button>
+            <button class="btn-option btn-cerebellum" onclick="handleAnswer('cerebellum')">小腦 (平衡/協調)</button>
+            <button class="btn-option btn-brainstem" onclick="handleAnswer('brainstem')">腦幹 (生命中樞)</button>
+            <button class="btn-option btn-spinal" onclick="handleAnswer('spinal')">脊髓 (反射/傳導)</button>
+        </div>
+
+        <div class="visual-area">
+            <svg class="brain-svg" viewBox="0 0 300 350">
+                <path id="part-spinal" class="brain-part" d="M130,220 L130,340 L170,340 L170,220 Z" />
+                <path id="part-brainstem" class="brain-part" d="M120,180 L120,230 L180,230 L180,180 Q160,170 140,170 Q130,170 120,180 Z" />
+                <path id="part-cerebellum" class="brain-part" d="M170,180 Q240,180 250,220 Q240,260 180,260 Q150,260 170,180 Z" />
+                <path id="part-cerebrum" class="brain-part" d="M80,160 Q80,50 180,50 Q260,50 260,150 Q260,180 200,180 L180,180 Q120,180 80,160" />
+                <text x="50" y="100" font-size="14" fill="#555">大腦</text>
+                <text x="240" y="210" font-size="14" fill="#555">小腦</text>
+                <text x="80" y="210" font-size="14" fill="#555">腦幹</text>
+                <text x="180" y="300" font-size="14" fill="#555">脊髓</text>
+            </svg>
+        </div>
+    </div>
+
+    <div id="start-screen" class="modal">
+        <h1>🧠 指揮官是誰？</h1>
+        <p>
+            限時 60 秒！<br>
+            幫生活情境找到正確的總部。<br>
+            <strong>大腦</strong>(思考)、<strong>小腦</strong>(平衡)、<strong>腦幹</strong>(生命)、<strong>脊髓</strong>(反射)
+        </p>
+        <button class="start-btn" onclick="startGame()">開始遊戲</button>
+    </div>
+
+    <div id="end-screen" class="modal hidden">
+        <h1>時間到！</h1>
+        <p>你的最終得分是：<span id="final-score" style="font-size:3rem; color:#f1c40f; font-weight:bold;">0</span> 分</p>
+        <p id="feedback-msg">還不錯喔！</p>
+        <p id="next-hint" style="font-size: 0.9rem; color: #bdc3c7; display: none;">(獲得 100 分以上可解鎖下一頁)</p>
+        
+        <div class="btn-group">
+            <button class="start-btn" onclick="startGame()">🔄 再玩一次</button>
+            <a href="unit3.html" id="next-page-btn" class="next-btn disabled">➡️ 前往單元 3</a>
+        </div>
+    </div>
+
+<script>
+    // --- 題庫 ---
+    const questionBank = [
+        { t: "背誦英文單字", a: "cerebrum" }, { t: "解開數學方程式", a: "cerebrum" },
+        { t: "感覺到冰淇淋很甜", a: "cerebrum" }, { t: "聽到上課鐘聲", a: "cerebrum" },
+        { t: "決定舉手發言", a: "cerebrum" }, { t: "回憶小時候的趣事", a: "cerebrum" },
+        { t: "感到非常生氣", a: "cerebrum" }, { t: "欣賞美麗的風景", a: "cerebrum" },
+        { t: "感覺被針刺很痛", a: "cerebrum" }, { t: "說出流利的中文", a: "cerebrum" },
+        { t: "走鋼索能保持平衡", a: "cerebellum" }, { t: "騎腳踏車不跌倒", a: "cerebellum" },
+        { t: "穿針引線動作精準", a: "cerebellum" }, { t: "體操選手優美落地", a: "cerebellum" },
+        { t: "能協調閉眼單腳站立", a: "cerebellum" }, { t: "投籃動作協調流暢", a: "cerebellum" },
+        { t: "練習彈鋼琴的手指協調", a: "cerebellum" }, { t: "鳥類飛行平衡", a: "cerebellum" },
+        { t: "喝醉酒走路不穩", a: "cerebellum" }, { t: "維持身體姿勢", a: "cerebellum" },
+        { t: "睡覺時持續呼吸", a: "brainstem" }, { t: "心臟持續跳動", a: "brainstem" },
+        { t: "吃到胡椒粉打噴嚏", a: "brainstem" }, { t: "異物入喉引起咳嗽", a: "brainstem" },
+        { t: "感覺冷時發抖", a: "brainstem" }, { t: "吃飯時不自覺分泌口水", a: "brainstem" },
+        { t: "眼前有飛蟲眨眼", a: "brainstem" }, { t: "調節體溫維持37度", a: "brainstem" },
+        { t: "植物人仍維持生命徵象", a: "brainstem" }, 
+        { t: "手摸熱鍋立刻縮回", a: "spinal" }, { t: "腳踩圖釘立刻縮腳", a: "spinal" },
+        { t: "膝跳反應(敲擊膝蓋)", a: "spinal" }, { t: "腦部與軀幹的訊息通道", a: "spinal" },
+        { t: "手被電到瞬間彈開", a: "spinal" }, { t: "四肢反射的中樞", a: "spinal" },
+        { t: "頸部以下的反射控制", a: "spinal" }, 
+        { t: "將手部感覺傳到腦部", a: "spinal" }, { t: "將腦部命令傳到腿部", a: "spinal" }
+    ];
+
+    let score = 0;
+    let timeLeft = 60;
+    let timerId = null;
+    let currentQuestion = null;
+    let isAnswering = false;
+
+    function startGame() {
+        score = 0;
+        timeLeft = 60;
+        isAnswering = false;
+        
+        document.getElementById("score-display").textContent = score;
+        document.getElementById("time-display").textContent = timeLeft;
+        document.getElementById("start-screen").classList.add("hidden");
+        document.getElementById("end-screen").classList.add("hidden");
+        
+        timerId = setInterval(updateTimer, 1000);
+        nextQuestion();
+    }
+
+    function updateTimer() {
+        timeLeft--;
+        document.getElementById("time-display").textContent = timeLeft;
+        if (timeLeft <= 10) document.getElementById("time-display").style.color = "#e74c3c";
+        else document.getElementById("time-display").style.color = "#f1c40f";
+
+        if (timeLeft <= 0) endGame();
+    }
+
+    function nextQuestion() {
+        const randomIndex = Math.floor(Math.random() * questionBank.length);
+        currentQuestion = questionBank[randomIndex];
+        
+        const qText = document.getElementById("question-text");
+        qText.style.opacity = 0;
+        setTimeout(() => {
+            qText.textContent = currentQuestion.t;
+            qText.style.opacity = 1;
+        }, 200);
+
+        resetVisuals();
+        isAnswering = false;
+    }
+
+    function handleAnswer(userChoice) {
+        if (isAnswering) return;
+        isAnswering = true;
+
+        const isCorrect = (userChoice === currentQuestion.a);
+        const feedbackOverlay = document.getElementById("feedback-overlay");
+        const correctPartId = "part-" + currentQuestion.a;
+        
+        document.getElementById(correctPartId).classList.add("active-" + currentQuestion.a);
+
+        if (isCorrect) {
+            score += 10;
+            document.getElementById("score-display").textContent = score;
+            feedbackOverlay.textContent = "✅";
+            feedbackOverlay.className = "overlay correct-overlay";
+            feedbackOverlay.style.opacity = 1;
+            setTimeout(() => {
+                feedbackOverlay.style.opacity = 0;
+                nextQuestion();
+            }, 500);
+        } else {
+            feedbackOverlay.textContent = "❌";
+            feedbackOverlay.className = "overlay wrong-overlay";
+            feedbackOverlay.style.opacity = 1;
+            setTimeout(() => {
+                feedbackOverlay.style.opacity = 0;
+                nextQuestion();
+            }, 1200);
+        }
+    }
+
+    function resetVisuals() {
+        const parts = document.querySelectorAll(".brain-part");
+        parts.forEach(p => {
+            p.classList.remove("active-cerebrum", "active-cerebellum", "active-brainstem", "active-spinal");
+        });
+    }
+
+    function endGame() {
+        clearInterval(timerId);
+        document.getElementById("end-screen").classList.remove("hidden");
+        document.getElementById("final-score").textContent = score;
+        
+        const msg = document.getElementById("feedback-msg");
+        const nextBtn = document.getElementById("next-page-btn");
+        const nextHint = document.getElementById("next-hint");
+
+        // 判斷解鎖條件：例如 100 分以上
+        if (score >= 100) {
+            nextBtn.classList.remove("disabled");
+            nextHint.style.display = "none";
+            
+            if (score >= 300) msg.textContent = "太神啦！你是神經學大師！🎓";
+            else if (score >= 200) msg.textContent = "很棒喔！大部分都答對了！👍";
+            else msg.textContent = "恭喜過關！準備好進入下一章節！💪";
+        } else {
+            nextBtn.classList.add("disabled");
+            nextHint.style.display = "block";
+            msg.textContent = "分數有點低喔，建議再試一次熟悉腦部功能！📚";
+        }
+    }
+</script>
+</body>
+</html>

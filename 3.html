@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單元 3：意識 vs. 反射 - 國中生物自學網</title>
+    <style>
+        :root {
+            /* 橘紅色系代表警示與行動 */
+            --primary-color: #d35400;
+            --accent-color: #e67e22;
+            --success-color: #27ae60;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --light-accent: #fbeee6;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 { margin: 0; font-size: 2.2rem; }
+        header p { opacity: 0.9; font-size: 1.1rem; margin-top: 10px; }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        h3 { color: var(--accent-color); margin-top: 25px; }
+
+        /* --- 練習題區塊 --- */
+        .practice-box {
+            background-color: var(--light-accent);
+            border: 2px solid #edbb99;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .practice-box.solved {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+
+        .practice-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .practice-feedback {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .btn-check {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-check:hover { background-color: #a04000; }
+        .btn-disabled { background-color: #95a5a6; cursor: default; }
+
+        /* --- 神經傳導路徑動畫 (SVG) --- */
+        .pathway-container {
+            width: 100%;
+            height: 350px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: #fff;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .pathway-svg {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
+        }
+
+        /* 路徑線條 */
+        .nerve-path {
+            fill: none;
+            stroke: #ddd;
+            stroke-width: 4;
+            stroke-linecap: round;
+        }
+
+        /* 訊號點 */
+        .signal-dot {
+            fill: #e74c3c;
+            opacity: 0;
+        }
+
+        @keyframes movePath {
+            0% { offset-distance: 0%; opacity: 1; }
+            90% { opacity: 1; }
+            100% { offset-distance: 100%; opacity: 0; }
+        }
+
+        .anim-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            display: block;
+            margin: 10px auto;
+            transition: transform 0.2s;
+        }
+        .anim-btn:hover { transform: scale(1.05); background: #2c3e50; }
+
+        /* --- 總測驗 --- */
+        .quiz-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #fafafa; }
+        .question { margin-bottom: 20px; }
+        .options label { display: block; margin: 5px 0; cursor: pointer; padding: 8px; border-radius: 4px; transition: background 0.2s; }
+        .options label:hover { background: #eee; }
+        .feedback-text { font-weight: bold; margin-left: 10px; }
+        .correct { color: var(--success-color); }
+        .wrong { color: #c0392b; }
+
+        button.submit-btn {
+            background-color: var(--accent-color); color: white; border: none;
+            padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px;
+            width: 100%; margin-top: 10px;
+        }
+        button.submit-btn:hover { background-color: #d35400; }
+
+        /* --- 底部導覽列 --- */
+        .navigation-footer {
+            text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd;
+        }
+        .nav-btn {
+            display: inline-block; padding: 15px 40px; font-size: 1.2rem; text-decoration: none;
+            border-radius: 50px; font-weight: bold; transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .nav-btn.disabled { background-color: #bdc3c7; color: #7f8c8d; cursor: not-allowed; pointer-events: none; }
+        .nav-btn.enabled { background-color: var(--warning-color); color: white; cursor: pointer; pointer-events: auto; animation: bounce 1s; }
+        .nav-btn.enabled:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(230, 126, 34, 0.3); background-color: #d35400; }
+        .lock-hint { margin-top: 10px; color: #7f8c8d; font-size: 0.9rem; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>生物的協調作用</h1>
+    <p>單元 3：意識 vs. 反射 (神經傳導途徑)</p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>導言：身體的快速道路與一般道路</h2>
+        <p>當神經系統接收到刺激時，訊息會走不同的路徑。有時候我們需要深思熟慮（走遠路），有時候為了保命必須瞬間反應（走捷徑）。這就是「意識行為」與「反射作用」的差別。</p>
+    </div>
+
+    <div class="card">
+        <h2>一、 意識行為 (Conscious Behavior)</h2>
+        <p>由<strong>大腦</strong>控制的行為。訊息必須傳到大腦進行判斷，雖然速度較慢，但能做出複雜的反應。</p>
+        <ul>
+            <li><strong>特徵</strong>：可由意志控制、可以透過學習變熟練。</li>
+            <li><strong>例子</strong>：看到尺掉落用手去接、背英文單字、感覺痛而撫摸傷口。</li>
+        </ul>
+        
+        <p><strong>🧠 傳導路徑演示：看到尺掉落，用手去接</strong></p>
+        <div class="pathway-container">
+            <svg class="pathway-svg" viewBox="0 0 300 300">
+                <path d="M150,20 Q180,20 180,50 L180,100 L240,150" stroke="#ccc" fill="none" stroke-width="2"/> <path d="M150,20 Q120,20 120,50 L120,280" stroke="#ccc" fill="none" stroke-width="2"/> <circle cx="150" cy="40" r="30" fill="#fdebd0" stroke="#aaa"/> <text x="135" y="45" font-size="12" fill="#555">大腦</text>
+                
+                <circle cx="170" cy="35" r="5" fill="#3498db"/>
+                <text x="180" y="35" font-size="10">眼(受器)</text>
+                
+                <rect x="230" y="145" width="20" height="20" fill="#e74c3c"/>
+                <text x="255" y="160" font-size="10">手(動器)</text>
+
+                <path id="path-conscious" d="M170,35 L150,40 L120,100 L240,155" class="nerve-path"/>
+                
+                <circle id="dot-conscious" r="6" class="signal-dot">
+                    <animateMotion id="anim-conscious" dur="2s" begin="indefinite" fill="freeze">
+                        <mpath href="#path-conscious"/>
+                    </animateMotion>
+                </circle>
+            </svg>
+        </div>
+        <button class="anim-btn" onclick="playAnimation('conscious')">▶ 播放：意識行為路徑</button>
+        <p style="text-align:center; font-size:0.9em; color:#555;">路徑：眼(受器) ➝ 感覺神經 ➝ <strong>大腦</strong> ➝ 脊髓 ➝ 運動神經 ➝ 手(動器)</p>
+
+        <div class="practice-box" id="practice-box-1" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 1</div>
+            <p>下列哪一個行為屬於「意識行為」？</p>
+            <div class="options">
+                <label><input type="radio" name="p1" value="A"> (A) 手碰到熱鍋立刻縮回</label>
+                <label><input type="radio" name="p1" value="B"> (B) 眼睛看到強光瞳孔縮小</label>
+                <label><input type="radio" name="p1" value="C"> (C) 聽到電話響伸手去接</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice1(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p1"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>二、 反射作用 (Reflex Action)</h2>
+        <p>由<strong>脊髓</strong>或<strong>腦幹</strong>控制，不經過大腦的快速反應。通常是為了保護身體免受傷害。</p>
+        <ul>
+            <li><strong>特徵</strong>：速度快、無意識、與生俱來（不用學）。</li>
+            <li><strong>例子</strong>：手觸熱縮回（脊髓）、膝跳反應（脊髓）、眨眼、打噴嚏（腦幹）。</li>
+        </ul>
+
+        <p><strong>⚡ 傳導路徑演示：手觸熱鍋，立刻縮回</strong></p>
+        <div class="pathway-container">
+            <svg class="pathway-svg" viewBox="0 0 300 300">
+                <path d="M150,20 Q120,20 120,50 L120,200" stroke="#ccc" fill="none" stroke-width="2"/> <circle cx="150" cy="40" r="30" fill="#fdebd0" stroke="#aaa" opacity="0.3"/> <rect x="200" y="150" width="20" height="20" fill="#e74c3c"/>
+                <text x="225" y="165" font-size="10">手(動器)</text>
+                <circle cx="210" cy="190" r="5" fill="#3498db"/>
+                <text x="220" y="195" font-size="10">皮膚(受器)</text>
+
+                <path id="path-reflex" d="M210,190 L120,170 L200,150" class="nerve-path" stroke="#e67e22"/>
+                
+                <rect x="100" y="150" width="40" height="40" rx="5" fill="#eee" stroke="#333"/>
+                <text x="105" y="175" font-size="12">脊髓</text>
+
+                <circle id="dot-reflex" r="6" class="signal-dot">
+                    <animateMotion id="anim-reflex" dur="1s" begin="indefinite" fill="freeze">
+                        <mpath href="#path-reflex"/>
+                    </animateMotion>
+                </circle>
+            </svg>
+        </div>
+        <button class="anim-btn" onclick="playAnimation('reflex')">▶ 播放：反射作用路徑</button>
+        <p style="text-align:center; font-size:0.9em; color:#555;">路徑：皮膚(受器) ➝ 感覺神經 ➝ <strong>脊髓</strong> ➝ 運動神經 ➝ 手(動器)</p>
+        
+        <div class="highlight-box" style="background:#fdedec; padding:10px; margin-top:10px; border-radius:5px; font-size:0.9em;">
+            <strong>💡 重要觀念：</strong> 反射發生後，脊髓會「順便」把訊息往上傳給大腦，所以我們通常是<strong>先縮手，才感覺到痛</strong>！
+        </div>
+
+        <div class="practice-box" id="practice-box-2" data-solved="false">
+            <div class="practice-title">📝 隨堂小練習 2</div>
+            <p>「手碰到熱燙的鍋子立刻縮回」，這個反射動作的中樞是哪裡？</p>
+            <div class="options">
+                <label><input type="radio" name="p2" value="A"> (A) 大腦</label>
+                <label><input type="radio" name="p2" value="B"> (B) 脊髓</label>
+                <label><input type="radio" name="p2" value="C"> (C) 心臟</label>
+            </div>
+            <button class="btn-check" onclick="checkPractice2(this)">檢查答案</button>
+            <div class="practice-feedback" id="fb-p2"></div>
+        </div>
+    </div>
+
+    <div class="card" id="final-quiz-card">
+        <h2>🧠 形成性評量 (總測驗)</h2>
+        <p>比較完兩者的差異後，請完成測驗以解鎖下一單元（虛擬實驗室）。</p>
+        <div class="quiz-container">
+            <div class="question">
+                <p><strong>1. 下列關於「腳踩煞車」與「膝跳反應」的比較，何者正確？</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q1" value="A"> (A) 兩者都是意識行為</label>
+                    <label><input type="radio" name="q1" value="B"> (B) 兩者都是反射作用</label>
+                    <label><input type="radio" name="q1" value="C"> (C) 踩煞車是大腦控制，膝跳反應是脊髓控制</label>
+                </div>
+                <div class="feedback-text" id="fb-q1"></div>
+            </div>
+
+            <div class="question">
+                <p><strong>2. 關於神經傳導路徑，下列敘述何者錯誤？</strong></p>
+                <div class="options">
+                    <label><input type="radio" name="q2" value="A"> (A) 意識行為的路徑通常比反射作用長</label>
+                    <label><input type="radio" name="q2" value="B"> (B) 所有的感覺最後都要傳到大腦才能產生「意識」</label>
+                    <label><input type="radio" name="q2" value="C"> (C) 反射作用完全不需要受器的參與</label>
+                </div>
+                <div class="feedback-text" id="fb-q2"></div>
+            </div>
+
+            <button class="submit-btn" onclick="checkFinalQuiz()">送出試卷</button>
+        </div>
+    </div>
+
+    <div class="navigation-footer">
+        <a href="" id="next-link" class="nav-btn disabled">前往單元 4：虛擬實驗室</a>
+        <p class="lock-hint" id="lock-msg">🔒 請完成所有小練習與總測驗才能前往下一頁</p>
+    </div>
+
+</div>
+
+<script>
+    // --- 動畫控制 ---
+    function playAnimation(type) {
+        const dot = document.getElementById('dot-' + type);
+        const anim = document.getElementById('anim-' + type);
+        
+        // 重置動畫
+        dot.style.opacity = '1';
+        anim.beginElement();
+    }
+
+    // --- 全域進度追蹤 ---
+    let progress = {
+        p1: false,
+        p2: false,
+        final: false
+    };
+
+    function updateGlobalState() {
+        const nextLink = document.getElementById('next-link');
+        const lockMsg = document.getElementById('lock-msg');
+        
+        if (progress.p1 && progress.p2 && progress.final) {
+            nextLink.classList.remove('disabled');
+            nextLink.classList.add('enabled');
+            lockMsg.innerHTML = "🎉 恭喜！你已經釐清了神經傳導的秘密，快去實驗室吧！";
+            lockMsg.style.color = "#27ae60";
+        }
+    }
+
+    // --- 隨堂小練習 1 ---
+    function checkPractice1(btn) {
+        const selected = document.querySelector('input[name="p1"]:checked');
+        const feedback = document.getElementById('fb-p1');
+        const box = document.getElementById('practice-box-1');
+
+        feedback.style.display = 'block';
+        if (selected && selected.value === 'C') {
+            feedback.innerHTML = "<span class='correct'>✅ 答對了！接電話需要大腦判斷。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p1 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 錯誤。(A)(B)都是不需要大腦思考的反射喔！</span>";
+        }
+    }
+
+    // --- 隨堂小練習 2 ---
+    function checkPractice2(btn) {
+        const selected = document.querySelector('input[name="p2"]:checked');
+        const feedback = document.getElementById('fb-p2');
+        const box = document.getElementById('practice-box-2');
+
+        feedback.style.display = 'block';
+        if (selected && selected.value === 'B') {
+            feedback.innerHTML = "<span class='correct'>✅ 正確！四肢的反射中樞在脊髓。</span>";
+            box.classList.add('solved');
+            btn.classList.add('btn-disabled');
+            btn.disabled = true;
+            progress.p2 = true;
+            updateGlobalState();
+        } else {
+            feedback.innerHTML = "<span class='wrong'>❌ 錯誤。大腦太慢了，來不及保護手！</span>";
+        }
+    }
+
+    // --- 總測驗檢查 ---
+    function checkFinalQuiz() {
+        // Q1 檢查
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const fb1 = document.getElementById('fb-q1');
+        let q1Correct = false;
+        
+        if (q1) {
+            if (q1.value === 'C') {
+                fb1.innerHTML = "<span class='correct'>✅ 正確</span>";
+                q1Correct = true;
+            } else {
+                fb1.innerHTML = "<span class='wrong'>❌ 錯誤</span>";
+            }
+        } else {
+            fb1.innerHTML = "<span class='wrong'>⚠️ 請作答</span>";
+        }
+
+        // Q2 檢查
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const fb2 = document.getElementById('fb-q2');
+        let q2Correct = false;
+
+        if (q2) {
+            if (q2.value === 'C') {
+                fb2.innerHTML = "<span class='correct'>✅ 正確 (反射當然需要受器來接收刺激！)</span>";
+                q2Correct = true;
+            } else {
+                fb2.innerHTML = "<span class='wrong'>❌ 錯誤</span>";
+            }
+        } else {
+            fb2.innerHTML = "<span class='wrong'>⚠️ 請作答</span>";
+        }
+
+        if (q1Correct && q2Correct) {
+            progress.final = true;
+            document.querySelector('.submit-btn').textContent = "已完成測驗";
+            document.querySelector('.submit-btn').style.background = "#27ae60";
+            document.querySelector('.submit-btn').disabled = true;
+            updateGlobalState();
+        } else {
+            progress.final = false;
+        }
+    }
+</script>
+
+</body>
+</html>

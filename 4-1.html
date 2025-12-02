@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>遊戲 1：神經傳導接龍 - 國中生物自學網</title>
+    <style>
+        :root {
+            --primary: #2980b9;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #ecf0f1;
+            --card-bg: #fff;
+            --slot-bg: #dfe6e9;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none; /* 防止選取文字干擾拖曳 */
+        }
+
+        /* --- 頂部資訊 --- */
+        header {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .level-indicator {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            color: #a9cce3;
+        }
+
+        /* --- 遊戲區域 --- */
+        .game-container {
+            width: 95%;
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .scenario-box {
+            background: #eaf2f8;
+            border-left: 5px solid var(--secondary);
+            padding: 15px;
+            width: 90%;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .scenario-title {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        /* --- 放置區域 (Slots) --- */
+        .pathway-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .slot-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .slot {
+            width: 120px;
+            height: 80px;
+            background-color: var(--slot-bg);
+            border: 3px dashed #bdc3c7;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #95a5a6;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .slot.active {
+            border-color: var(--secondary);
+            background-color: #ebf5fb;
+        }
+
+        .slot.correct {
+            border-color: var(--success);
+            border-style: solid;
+            background-color: #eafaf1;
+            color: var(--success);
+        }
+
+        .arrow {
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            margin: 0 5px;
+        }
+
+        /* --- 卡片區域 (Draggables) --- */
+        .cards-pool {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            background: #f7f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            min-height: 100px;
+        }
+
+        .card {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: grab;
+            font-weight: bold;
+            color: var(--primary);
+            border: 2px solid transparent;
+            transition: transform 0.2s, box-shadow 0.2s;
+            touch-action: none; /* 重要：防止手機捲動頁面 */
+        }
+
+        .card:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        .card.dragging {
+            opacity: 0.5;
+        }
+
+        .card.placed {
+            cursor: default;
+            background: transparent;
+            box-shadow: none;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card.selected {
+            border-color: var(--secondary);
+            background-color: #d6eaf8;
+        }
+
+        /* 錯誤動畫 */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; border-color: var(--error) !important; color: var(--error) !important; }
+
+        /* --- 視窗 --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .start-btn { background: #e67e22; color: white; }
+        .start-btn:hover { transform: scale(1.05); }
+
+        .next-btn {
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .next-btn.disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>神經傳導接龍</h1>
+        <div class="level-indicator" id="level-display">關卡 1 / 2</div>
+    </header>
+
+    <div class="game-container">
+        <div class="scenario-box">
+            <div class="scenario-title" id="scenario-title">題目載入中...</div>
+            <div id="scenario-desc">請將下方的卡片拖曳到正確的流程位置中。</div>
+        </div>
+
+        <div class="pathway-container" id="slots-area">
+            </div>
+
+        <div class="cards-pool" id="cards-area">
+            </div>
+    </div>
+
+    <div id="start-screen" class="modal">
+        <h1>🧬 神經傳導接龍</h1>
+        <p style="text-align:center; font-size:1.2rem; line-height:1.6; max-width:600px;">
+            請將打亂的神經傳導步驟，依照正確順序排列。<br>
+            <br>
+            <strong>玩法：</strong><br>
+            拖曳卡片到上方的虛線格子中。<br>
+            如果順序正確，卡片會吸附；<br>
+            如果錯誤，卡片會彈回原處！
+        </p>
+        <button class="btn start-btn" onclick="startGame()">開始挑戰</button>
+    </div>
+
+    <div id="end-screen" class="modal hidden">
+        <h1 style="color:#2ecc71">挑戰成功！</h1>
+        <p style="font-size:1.2rem;">你已經精通神經傳導的路徑了！</p>
+        
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn start-btn" onclick="startGame()">🔄 再玩一次</button>
+            <a href="unit4_lab.html" id="next-page-btn" class="btn next-btn">➡️ 前往單元 4：虛擬實驗室</a>
+        </div>
+    </div>
+
+<script>
+    // --- 音效產生器 (無需外部檔案) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            // 叮咚聲 (高音)
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(500, audioCtx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1000, audioCtx.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.5);
+        } else {
+            // 錯誤聲 (低音嗡嗡)
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+    }
+
+    // --- 遊戲資料 ---
+    const levels = [
+        {
+            title: "情境一：開車看到紅燈踩煞車 (意識行為)",
+            items: ["眼睛(受器)", "感覺神經元", "大腦", "脊髓", "運動神經元", "腳部肌肉(動器)"]
+        },
+        {
+            title: "情境二：手碰到熱鍋立刻縮回 (反射作用)",
+            items: ["皮膚(受器)", "感覺神經元", "脊髓", "運動神經元", "手部肌肉(動器)"]
+        }
+    ];
+
+    let currentLevelIdx = 0;
+    let placedCount = 0;
+    let selectedCard = null; // 用於點擊模式
+
+    // --- DOM ---
+    const slotsArea = document.getElementById('slots-area');
+    const cardsArea = document.getElementById('cards-area');
+    const titleEl = document.getElementById('scenario-title');
+    const levelDisplay = document.getElementById('level-display');
+
+    function startGame() {
+        currentLevelIdx = 0;
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.add('hidden');
+        loadLevel(currentLevelIdx);
+    }
+
+    function loadLevel(index) {
+        const level = levels[index];
+        titleEl.textContent = level.title;
+        levelDisplay.textContent = `關卡 ${index + 1} / ${levels.length}`;
+        placedCount = 0;
+        selectedCard = null;
+
+        // 清空區域
+        slotsArea.innerHTML = '';
+        cardsArea.innerHTML = '';
+
+        // 建立 Slots (格子)
+        level.items.forEach((item, i) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'slot-wrapper';
+            
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            slot.dataset.index = i; // 紀錄正確順序
+            slot.dataset.answer = item;
+            slot.textContent = i + 1; // 顯示步驟編號
+            
+            // 拖放事件
+            slot.addEventListener('dragover', handleDragOver);
+            slot.addEventListener('drop', handleDrop);
+            slot.addEventListener('click', () => handleSlotClick(slot)); // 點擊模式
+
+            wrapper.appendChild(slot);
+            
+            // 加箭頭 (除了最後一個)
+            if (i < level.items.length - 1) {
+                const arrow = document.createElement('div');
+                arrow.className = 'arrow';
+                arrow.textContent = '→';
+                wrapper.appendChild(arrow);
+            }
+            
+            slotsArea.appendChild(wrapper);
+        });
+
+        // 建立 Cards (打亂順序)
+        const shuffledItems = [...level.items].sort(() => Math.random() - 0.5);
+        shuffledItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.draggable = true;
+            card.textContent = item;
+            card.id = 'card-' + item; // 唯一ID
+            
+            // 拖放事件
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('touchstart', handleTouchStart, {passive: false});
+            card.addEventListener('click', () => handleCardClick(card)); // 點擊模式
+
+            cardsArea.appendChild(card);
+        });
+    }
+
+    // --- 拖放邏輯 (Mouse) ---
+    function handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.textContent);
+        e.dataTransfer.effectAllowed = 'move';
+        e.target.classList.add('dragging');
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault(); // 允許放置
+        e.target.classList.add('active');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const slot = e.target;
+        slot.classList.remove('active');
+        
+        // 找到正在拖曳的卡片
+        const draggingCard = document.querySelector('.card.dragging');
+        if (!draggingCard) return;
+
+        validateMove(slot, draggingCard);
+        draggingCard.classList.remove('dragging');
+    }
+
+    // --- 觸控拖曳邏輯 (Touch - 簡易模擬) ---
+    let touchCard = null;
+
+    function handleTouchStart(e) {
+        touchCard = e.target;
+        // 為了不干擾捲動，這裡不做 preventDefault，除非我們要實作完全跟隨手指
+        // 這裡採用「點擊選取」模式來支援手機，體驗較好
+        handleCardClick(touchCard);
+    }
+
+    // --- 點擊模式邏輯 (混合支援手機與滑鼠) ---
+    function handleCardClick(card) {
+        if (card.classList.contains('placed')) return;
+
+        // 如果之前有選中的，取消選中
+        if (selectedCard) {
+            selectedCard.classList.remove('selected');
+        }
+
+        // 選中當前卡片
+        selectedCard = card;
+        card.classList.add('selected');
+    }
+
+    function handleSlotClick(slot) {
+        if (!selectedCard) return; // 沒有選中卡片
+        if (slot.classList.contains('correct')) return; // 該格已完成
+
+        validateMove(slot, selectedCard);
+        selectedCard.classList.remove('selected');
+        selectedCard = null;
+    }
+
+    // --- 核心驗證邏輯 ---
+    function validateMove(slot, card) {
+        const expected = slot.dataset.answer;
+        const actual = card.textContent;
+
+        if (expected === actual) {
+            // 答對
+            playSound('correct');
+            slot.textContent = '';
+            slot.classList.add('correct');
+            
+            // 視覺移動
+            card.classList.add('placed');
+            card.draggable = false;
+            slot.appendChild(card);
+            
+            placedCount++;
+            checkLevelComplete();
+        } else {
+            // 答錯 (彈回)
+            playSound('wrong');
+            card.classList.add('shake');
+            setTimeout(() => {
+                card.classList.remove('shake');
+            }, 500);
+            
+            // 視覺提示錯誤
+            slot.style.borderColor = '#c0392b';
+            setTimeout(() => {
+                slot.style.borderColor = ''; // 恢復原狀
+            }, 500);
+        }
+    }
+
+    function checkLevelComplete() {
+        const currentLevel = levels[currentLevelIdx];
+        if (placedCount === currentLevel.items.length) {
+            setTimeout(() => {
+                if (currentLevelIdx < levels.length - 1) {
+                    alert("✅ 太棒了！進入下一關！");
+                    currentLevelIdx++;
+                    loadLevel(currentLevelIdx);
+                } else {
+                    document.getElementById('end-screen').classList.remove('hidden');
+                }
+            }, 500);
+        }
+    }
+
+    // 全局取消 slot active 樣式 (當拖曳離開時)
+    document.addEventListener('dragend', () => {
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單元 2 課前導讀：指揮總部</title>
+    <style>
+        :root {
+            --primary: #8e44ad;    /* 紫色系代表神經中樞 */
+            --accent: #9b59b6;     /* 淺紫重點 */
+            --highlight: #2980b9;  /* 藍色重點 */
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-top: 10px solid var(--primary);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        /* 圖片預留區 */
+        .img-placeholder {
+            width: 100%;
+            height: 250px;
+            background-color: #f5eef8; /* 淡紫色背景 */
+            border: 3px dashed #d2b4de;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #884ea0;
+            margin: 30px 0;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .img-placeholder:hover {
+            border-color: var(--primary);
+            background-color: #ebdef0;
+            transform: scale(1.01);
+        }
+
+        /* 課文區塊 */
+        .text-section {
+            font-size: 1.25rem;
+            text-align: justify;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fcfcfc;
+            border-left: 5px solid var(--primary);
+            border-radius: 0 10px 10px 0;
+        }
+
+        h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        /* 下拉選單樣式 */
+        select.cloze-input {
+            font-size: 1.15rem;
+            padding: 4px 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #333;
+            font-family: inherit;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 110px;
+        }
+
+        select.cloze-input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 5px rgba(155, 89, 182, 0.3);
+        }
+
+        /* 作答回饋 */
+        select.correct {
+            border-color: var(--success);
+            background-color: #eafaf1;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        select.wrong {
+            border-color: var(--error);
+            background-color: #fdedec;
+            color: var(--error);
+        }
+
+        /* 按鈕區 */
+        .action-area {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .check-btn {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px rgba(142, 68, 173, 0.2);
+        }
+
+        .check-btn:hover {
+            background-color: #71368a;
+            transform: translateY(-2px);
+        }
+
+        .next-btn {
+            background-color: #e67e22; /* 橘色按鈕比較顯眼 */
+            color: white;
+            margin-left: 20px;
+            box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2);
+            display: none; /* 預設隱藏 */
+            animation: bounce 1s infinite;
+        }
+
+        .next-btn:hover {
+            background-color: #d35400;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        /* 進度條 */
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--success);
+            transition: width 0.5s ease;
+        }
+        .status-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>單元 2：指揮總部</h1>
+        <p class="subtitle">主題：中樞神經系統 (腦與脊髓)</p>
+    </header>
+
+    <div class="text-section">
+        <h3>1. 認識中樞神經</h3>
+        <p>
+            人體的神經系統可分為「中樞神經系統」和「周圍神經系統」。中樞神經系統包含了位於頭顱內的
+            <select class="cloze-input" data-answer="腦">
+                <option value="">(選擇)</option>
+                <option value="腦">腦</option>
+                <option value="心臟">心臟</option>
+                <option value="神經節">神經節</option>
+            </select>
+            以及位於脊椎骨內的
+            <select class="cloze-input" data-answer="脊髓">
+                <option value="">(選擇)</option>
+                <option value="脊椎">脊椎</option>
+                <option value="脊髓">脊髓</option>
+                <option value="骨髓">骨髓</option>
+            </select>
+            ，它們就像是指揮中心，負責整合訊息並發出命令。
+        </p>
+    </div>
+
+    <div class="img-placeholder">
+        <span style="font-size: 3rem; margin-bottom: 10px;">🧠</span>
+        [請在此處插入課本圖 4-4：人體中樞神經系統與腦的構造]
+    </div>
+
+    <div class="text-section">
+        <h3>2. 腦的三大分區</h3>
+        <p>
+            腦部極為發達且脆弱，受到頭骨的保護。依功能與構造可分為：
+        </p>
+        <p>
+            ● <strong>大腦</strong>：分為左、右兩半球，最為發達。主要負責掌管感覺、運動、語言、記憶、思考等
+            <select class="cloze-input" data-answer="意識">
+                <option value="">(選擇)</option>
+                <option value="反射">反射</option>
+                <option value="意識">意識</option>
+                <option value="生命">生命</option>
+            </select>
+            行為。
+        </p>
+        <p>
+            ● <strong>小腦</strong>：位於大腦下方，主要負責協調全身肌肉的活動，以維持身體的
+            <select class="cloze-input" data-answer="平衡">
+                <option value="">(選擇)</option>
+                <option value="體溫">體溫</option>
+                <option value="平衡">平衡</option>
+                <option value="代謝">代謝</option>
+            </select>
+            。例如體操選手能做出精準動作，與此部位發達有關。
+        </p>
+        <p>
+            ● <strong>腦幹</strong>：位於小腦前方，連接大腦與脊髓。負責控制呼吸、心搏、體溫調節等重要的生理作用，若受損可能立即危及生命，因此被稱為
+            <select class="cloze-input" data-answer="生命中樞">
+                <option value="">(選擇)</option>
+                <option value="平衡中樞">平衡中樞</option>
+                <option value="生命中樞">生命中樞</option>
+                <option value="運動中樞">運動中樞</option>
+            </select>
+            。
+        </p>
+    </div>
+
+    <div class="text-section">
+        <h3>3. 訊息的高速公路：脊髓</h3>
+        <p>
+            脊髓呈長管狀，受到
+            <select class="cloze-input" data-answer="脊椎骨">
+                <option value="">(選擇)</option>
+                <option value="頭骨">頭骨</option>
+                <option value="脊椎骨">脊椎骨</option>
+                <option value="軟骨">軟骨</option>
+            </select>
+            的保護。
+        </p>
+        <p>
+            它的主要功能有兩項：
+            <br>1. 作為腦與軀幹、四肢之間的
+            <select class="cloze-input" data-answer="傳導">
+                <option value="">(選擇)</option>
+                <option value="思考">思考</option>
+                <option value="傳導">傳導</option>
+                <option value="製造">製造</option>
+            </select>
+            通道。
+            <br>2. 作為四肢與軀幹的
+            <select class="cloze-input" data-answer="反射">
+                <option value="">(選擇)</option>
+                <option value="感覺">感覺</option>
+                <option value="反射">反射</option>
+                <option value="記憶">記憶</option>
+            </select>
+            中樞（例如手觸熱縮回）。若脊髓受損，可能會導致受傷部位以下的肢體失去感覺或癱瘓。
+        </p>
+    </div>
+
+    <div class="action-area">
+        <button class="btn check-btn" onclick="checkAnswers()">檢查答案 🔍</button>
+        <a href="unit2_full.html" class="btn next-btn" id="nextLink">進入正式課程 🚀</a>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-text" id="statusText">目前得分：0 / 8 題</div>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const inputs = document.querySelectorAll('.cloze-input');
+        let correctCount = 0;
+        const totalCount = inputs.length;
+
+        inputs.forEach(select => {
+            select.classList.remove('correct', 'wrong');
+            
+            if (select.value === "") {
+                select.classList.add('wrong');
+            } else if (select.value === select.dataset.answer) {
+                select.classList.add('correct');
+                correctCount++;
+            } else {
+                select.classList.add('wrong');
+            }
+        });
+
+        // 更新進度
+        const percentage = (correctCount / totalCount) * 100;
+        document.getElementById('progressFill').style.width = percentage + '%';
+        
+        const statusText = document.getElementById('statusText');
+        
+        if (correctCount === totalCount) {
+            statusText.textContent = "🎉 太棒了！指揮總部的構造你都清楚了！";
+            statusText.style.color = "#27ae60";
+            statusText.style.fontWeight = "bold";
+            document.getElementById('nextLink').style.display = 'inline-block';
+        } else {
+            statusText.textContent = `再接再厲！目前答對 ${correctCount} / ${totalCount} 題`;
+            statusText.style.color = "#c0392b";
+            // 若需要答錯時隱藏按鈕，可取消下面註解
+            // document.getElementById('nextLink').style.display = 'none'; 
+        }
+    }
+</script>
+
+</body>
+</html>

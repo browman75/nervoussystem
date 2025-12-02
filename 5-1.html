@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>閱讀素養：神經訊號的接力賽 (精熟學習版)</title>
+    <style>
+        :root {
+            --primary: #008080;
+            --accent: #20b2aa;
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-main: #333;
+            --success: #27ae60;
+            --error: #c0392b;
+            --hint-bg: #fff3cd; /* 提示框背景色 (黃色系) */
+            --hint-text: #856404;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            line-height: 1.8;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* --- 文章區塊 --- */
+        .article-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            border-top: 5px solid var(--primary);
+        }
+
+        h1 { color: var(--primary); text-align: center; font-size: 2rem; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #7f8c8d; font-size: 1rem; margin-bottom: 30px; }
+        .article-content { font-size: 1.15rem; text-align: justify; }
+        .highlight {
+            background: linear-gradient(120deg, #d4efdf 0%, #d4efdf 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 88%;
+            font-weight: bold;
+            color: #145a32;
+        }
+
+        .diagram-box {
+            background: #eef9f9;
+            border: 2px dashed var(--accent);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        /* --- 題目區塊 --- */
+        .quiz-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+            border-left: 5px solid transparent; /* 用來標示狀態 */
+        }
+
+        .question-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge { background: var(--accent); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; }
+
+        .options-group { display: flex; flex-direction: column; gap: 10px; }
+
+        .option-btn {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover { background-color: #f0fdfc; border-color: var(--accent); }
+        
+        /* 選中狀態 */
+        .option-btn.selected { background-color: #e0f2f1; border-color: var(--primary); font-weight: bold; }
+
+        /* 答對樣式 */
+        .option-btn.correct { background-color: #eafaf1; border-color: var(--success); color: var(--success); pointer-events: none; }
+        .option-btn.correct::after { content: " ✔"; font-weight: bold; }
+
+        /* 答錯樣式 */
+        .option-btn.wrong { background-color: #fdedec; border-color: var(--error); color: var(--error); }
+        .option-btn.wrong::after { content: " ✘"; font-weight: bold; }
+
+        /* 提示區塊 (取代原本的詳解) */
+        .hint-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: var(--hint-bg);
+            border-left: 4px solid #ffc107;
+            color: var(--hint-text);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            display: none; /* 預設隱藏 */
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- 底部控制 --- */
+        .footer-control {
+            text-align: center;
+            margin: 50px 0;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,128,128, 0.3);
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .submit-btn:hover { transform: scale(1.05); }
+
+        .next-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            background: #e67e22;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+            transition: all 0.3s;
+            opacity: 0.5; /* 預設半透明 */
+            pointer-events: none; /* 預設不可點擊 */
+        }
+
+        /* 解鎖狀態 */
+        .next-btn.unlocked {
+            opacity: 1;
+            pointer-events: auto;
+            background: #d35400;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+            min-height: 40px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="article-card">
+        <h1>神經如何傳遞訊號？</h1>
+        <div class="subtitle">閱讀素養題組 • 精熟學習模式</div>
+        
+        <div class="article-content">
+            <p>你有沒有試過：腳被桌角撞到，還沒來得及罵人，腳就先縮開了？這種「比腦袋還快」的動作，就是神經系統驚人的傳訊速度。</p>
+            <p>科學家發現，一個神經細胞裡的訊號傳遞非常快，在細胞裡面，訊號是用<strong>「電」</strong>的方式跑的。不是真的家裡插座的那種電，而是細胞膜內外有不同的電荷，訊號跑的時候，電荷會像「一波一波的波浪」往前推進。這種方式既快又有效率，讓訊號能在軸突上迅速通過。</p>
+            <p>但是，麻煩來了。兩個神經細胞之間並沒有接在一起，它們的末端和下一個神經細胞之間，有一個超小的空隙，叫做<span class="highlight">「突觸」</span>。這個距離雖然只有幾萬分之一公分，但對電訊號來說，卻像是一個「跨不過去的斷橋」。</p>
+            <p>那怎麼辦？神經細胞想到了一招：把電訊號改成<strong>「化學物質」</strong>來接力。當電訊號跑到神經元的末端時，細胞會釋放一些小分子，把它們丟到突觸間隙這個小空隙裡。這些小分子會飄到下一個神經細胞表面，被那裡的「接收器」接住。只要一接到，下一個神經細胞就會「重新啟動電訊號」，訊號又能繼續往前跑。</p>
+
+            <div class="diagram-box">
+                <svg viewBox="0 0 500 120" style="width: 100%; max-width: 500px;">
+                    <path d="M20,60 L180,60" stroke="#333" stroke-width="4" />
+                    <circle cx="20" cy="60" r="15" fill="#3498db" />
+                    <text x="50" y="40" font-size="14" fill="#333">神經元 A (細胞內)</text>
+                    <text x="80" y="80" font-size="14" fill="#e74c3c" font-weight="bold">⚡ 電訊號 ⚡</text>
+                    <rect x="190" y="40" width="40" height="40" fill="#ecf0f1" stroke="#95a5a6" stroke-dasharray="4" />
+                    <circle cx="210" cy="50" r="3" fill="#27ae60" />
+                    <circle cx="210" cy="60" r="3" fill="#27ae60" />
+                    <circle cx="210" cy="70" r="3" fill="#27ae60" />
+                    <text x="180" y="30" font-size="12" fill="#27ae60" font-weight="bold">突觸 (化學物質)</text>
+                    <path d="M240,60 L400,60" stroke="#333" stroke-width="4" />
+                    <circle cx="400" cy="60" r="15" fill="#3498db" />
+                    <text x="260" y="40" font-size="14" fill="#333">神經元 B</text>
+                    <text x="280" y="80" font-size="14" fill="#e74c3c" font-weight="bold">⚡ 電訊號 ⚡</text>
+                </svg>
+            </div>
+
+            <p>所以整個流程就像是：<br><strong>神經細胞裡用電跑 → 到空隙換化學物質 → 到下一個細胞再變回電跑。</strong></p>
+            <p>如果把它比喻成接力賽：在跑道上時（神經細胞內），選手自己狂奔（電訊號）。但跑到不能跨越的壕溝時（突觸），選手要把接力棒丟給隊友（化學物質傳遞）。隊友接到棒子後又繼續衝（下一個細胞的電訊號）。</p>
+        </div>
+    </div>
+
+    <form id="quiz-form">
+        <div class="quiz-card" id="q1">
+            <div class="question-title"><span class="badge">圖表理解</span> 1. 在圖示中，哪一個地方需要靠「化學物質」才能把訊號傳過去？</div>
+            <div class="options-group">
+                <div class="option-btn" onclick="selectOption(1, 'A')">A. 神經元 A 內部</div>
+                <div class="option-btn" onclick="selectOption(1, 'B')">B. 神經元 B 內部</div>
+                <div class="option-btn" onclick="selectOption(1, 'C')">C. 神經元 A 和 B 中間的空隙</div>
+                <div class="option-btn" onclick="selectOption(1, 'D')">D. 肌肉和骨頭的接合處</div>
+            </div>
+            <div class="hint-box" id="hint-1">💡 提示：請仔細看圖片中間，兩個神經元並沒有接在一起，那個「斷橋」的區域標示了什麼物質？</div>
+        </div>
+
+        <div class="quiz-card" id="q2">
+            <div class="question-title"><span class="badge">基本推論</span> 2. 如果科學家讓神經元 A 不能釋放化學物質，最可能發生什麼事？</div>
+            <div class="options-group">
+                <div class="option-btn" onclick="selectOption(2, 'A')">A. 神經元 B 收不到訊號</div>
+                <div class="option-btn" onclick="selectOption(2, 'B')">B. 神經元 A 會停止產生電訊號</div>
+                <div class="option-btn" onclick="selectOption(2, 'C')">C. 空隙會自動變成電線連起來</div>
+                <div class="option-btn" onclick="selectOption(2, 'D')">D. 神經元 A 和 B 會變成同一個細胞</div>
+            </div>
+            <div class="hint-box" id="hint-2">💡 提示：回想接力賽的比喻，如果選手不把接力棒（化學物質）交出去，下一位選手（神經元 B）還能知道要跑嗎？</div>
+        </div>
+
+        <div class="quiz-card" id="q3">
+            <div class="question-title"><span class="badge">生活情境</span> 3. 有些毒物會讓神經末端「不能釋放化學物質」。人體可能會出現什麼狀況？</div>
+            <div class="options-group">
+                <div class="option-btn" onclick="selectOption(3, 'A')">A. 肉眼看得更清楚</div>
+                <div class="option-btn" onclick="selectOption(3, 'B')">B. 肌肉收不到指令而無力</div>
+                <div class="option-btn" onclick="selectOption(3, 'C')">C. 大腦的用電量變得較小</div>
+                <div class="option-btn" onclick="selectOption(3, 'D')">D. 手指的骨頭變脆弱</div>
+            </div>
+            <div class="hint-box" id="hint-3">💡 提示：神經的任務是傳遞命令給肌肉。如果訊號在中間斷掉了，肌肉還能收到「收縮」的指令嗎？</div>
+        </div>
+
+        <div class="quiz-card" id="q4">
+            <div class="question-title"><span class="badge">比喻理解</span> 4. 以下哪個比喻最像「電訊號 → 化學物質 → 電訊號」的方式？</div>
+            <div class="options-group">
+                <div class="option-btn" onclick="selectOption(4, 'A')">A. 水管的水一路流到底</div>
+                <div class="option-btn" onclick="selectOption(4, 'B')">B. 搭車時要先下車，再換另一班車</div>
+                <div class="option-btn" onclick="selectOption(4, 'C')">C. 兩根繩子綁在一起變長</div>
+                <div class="option-btn" onclick="selectOption(4, 'D')">D. 手機打電話可以直接聽到聲音</div>
+            </div>
+            <div class="hint-box" id="hint-4">💡 提示：神經傳遞不是「一路到底」的（像水管），中間有一個「轉換形式」的過程（電變化學，再變電），哪個選項有「轉換/轉乘」的感覺？</div>
+        </div>
+
+        <div class="quiz-card" id="q5">
+            <div class="question-title"><span class="badge">核心概念</span> 5. 根據文章內容，下列哪一項最能正確描述神經訊息的傳遞方式？</div>
+            <div class="options-group">
+                <div class="option-btn" onclick="selectOption(5, 'A')">A. 神經細胞內與細胞間都只靠電迅速傳遞</div>
+                <div class="option-btn" onclick="selectOption(5, 'B')">B. 神經細胞內用電傳遞，細胞之間用化學物質傳遞</div>
+                <div class="option-btn" onclick="selectOption(5, 'C')">C. 神經細胞內靠化學物質，細胞之間靠肌肉收縮</div>
+                <div class="option-btn" onclick="selectOption(5, 'D')">D. 神經細胞必須彼此接觸，才能傳遞任何訊息</div>
+            </div>
+            <div class="hint-box" id="hint-5">💡 提示：請看文章最後的粗體字總結：在「神經細胞裡」是用什麼跑？在「空隙」又是換成什麼？</div>
+        </div>
+
+        <div class="quiz-card" id="q6">
+            <div class="question-title"><span class="badge">跨情境推論</span> 6. 甲藥物「阻斷電訊號」，乙藥物「阻斷化學物質」。下列何者正確？</div>
+            <div class="options-group">
+                <div class="option-btn" onclick="selectOption(6, 'A')">A. 甲藥物阻斷神經細胞內的傳遞；乙藥物阻斷細胞之間的傳遞</div>
+                <div class="option-btn" onclick="selectOption(6, 'B')">B. 甲藥物會讓突觸空隙變得更大；乙藥物會縮小空隙讓電流通過</div>
+                <div class="option-btn" onclick="selectOption(6, 'C')">C. 甲藥物阻斷化學物質釋放；乙藥物阻斷電流產生</div>
+                <div class="option-btn" onclick="selectOption(6, 'D')">D. 甲、乙藥物都只會影響化學物質，不會影響電訊號</div>
+            </div>
+            <div class="hint-box" id="hint-6">💡 提示：對應原理：神經元「內部」靠電（這是甲藥物的作用點），神經元「之間」靠化學（這是乙藥物的作用點）。</div>
+        </div>
+    </form>
+
+    <div class="footer-control">
+        <button class="submit-btn" id="submit-btn" onclick="checkAnswers()">送出答案</button>
+        <div id="score-box" class="score-display"></div>
+        
+        <a href="unit_summary.html" id="next-page-btn" class="next-btn">
+            前往下一頁：單元總結 ➜
+        </a>
+        <p id="lock-msg" style="color:#7f8c8d; font-size:0.9rem; margin-top:10px;">🔒 必須全部答對才能解鎖下一頁</p>
+    </div>
+
+</div>
+
+<script>
+    // 正確答案
+    const correctAnswers = { 1: 'C', 2: 'A', 3: 'B
