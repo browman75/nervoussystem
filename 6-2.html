@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第 4 章 重點總結與挑戰</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --kahoot-purple: #46178f;
+            --kahoot-blue: #1368ce;
+            --mistake-bg: #fff5f5;
+            --mistake-border: #e74c3c;
+            --bg-color: #f3f4f6;
+        }
+
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- 標題區 --- */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+        }
+
+        /* --- 卡片通用樣式 --- */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        h2 {
+            border-left: 5px solid var(--accent);
+            padding-left: 15px;
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        /* --- 重點回顧列表 --- */
+        .summary-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .summary-list li {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1.1rem;
+        }
+
+        .summary-list li::before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .highlight {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        /* --- 易錯雷區 (大字體設計) --- */
+        .mistakes-card {
+            border: 3px solid var(--mistake-border);
+            background-color: var(--mistake-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mistakes-card::after {
+            content: "TRAP!";
+            position: absolute;
+            right: -20px;
+            top: 20px;
+            background: var(--mistake-border);
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .mistake-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #fab1a0;
+        }
+
+        .mistake-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .mistake-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #c0392b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mistake-content {
+            font-size: 1.5rem; /* 大字體 */
+            font-weight: bold;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.4;
+        }
+
+        .wrong { color: #e74c3c; text-decoration: line-through; color: #7f8c8d; font-size: 1.2rem; display: block; margin-bottom: 5px; }
+        .correct { color: #27ae60; display: block; }
+        .reason { font-size: 1rem; color: #555; font-weight: normal; margin-top: 5px; font-style: italic; }
+
+        /* --- Kahoot 挑戰區 --- */
+        .kahoot-section {
+            text-align: center;
+            background: linear-gradient(135deg, #46178f, #864cbf);
+            color: white;
+            border-radius: 20px;
+            padding: 40px 20px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(70, 23, 143, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 裝飾背景圓圈 */
+        .circle-bg {
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .nickname-box {
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .nickname-instruction {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .nickname-example {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #f1c40f; /* 黃色強調 */
+            letter-spacing: 3px;
+            background: #2c3e50;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+
+        /* Kahoot 按鈕 */
+        .kahoot-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: var(--kahoot-purple);
+            font-size: 1.8rem;
+            font-weight: 900;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 8px 0 #bdc3c7, 0 15px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            position: relative;
+            top: 0;
+            gap: 15px;
+            animation: pulseBtn 2s infinite;
+        }
+
+        .kahoot-btn:active {
+            top: 8px;
+            box-shadow: 0 0 0 #bdc3c7, 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        /* Kahoot Icon (CSS 繪製) */
+        .k-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--kahoot-purple);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 35px;
+            transform: rotate(-5deg);
+            border: 3px solid #333;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseBtn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>第 4 章 生物的協調作用</h1>
+        <div class="subtitle">重點總結 & 終極挑戰</div>
+    </header>
+
+    <div class="container">
+        
+        <!-- 重點回顧 -->
+        <div class="card">
+            <h2>📚 重點速記</h2>
+            <ul class="summary-list">
+                <li><strong>刺激與反應路徑：</strong> 受器 ➝ 感覺神經元 ➝ <span class="highlight">中樞神經</span> ➝ 運動神經元 ➝ 動器。</li>
+                <li><strong>神經元構造：</strong> <span class="highlight">細胞本體</span>（含細胞核，管代謝）、<span class="highlight">神經纖維</span>（傳遞訊息）。</li>
+                <li><strong>中樞神經系統：</strong>
+                    <ul>
+                        <li><strong>大腦：</strong> 意識、記憶、感覺、語言、運動。</li>
+                        <li><strong>小腦：</strong> <span class="highlight">平衡</span>、肌肉協調（體操、騎車）。</li>
+                        <li><strong>腦幹：</strong> <span class="highlight">生命中樞</span>（呼吸、心跳、吞嚥）。</li>
+                    </ul>
+                </li>
+                <li><strong>脊髓功能：</strong> 腦與軀幹的通道、四肢的<span class="highlight">反射中樞</span>。</li>
+            </ul>
+        </div>
+
+        <!-- 易錯雷區 (大字體) -->
+        <div class="card mistakes-card">
+            <h2>⚠️ 考前急救站：這裡最容易錯！</h2>
+            
+            <div class="mistake-item">
+                <div class="mistake-title">🔥 1. 生命中樞在哪裡？</div>
+                <div class="mistake-content">
+                    <span class="wrong">❌ 心臟</span>
+                    <span class="correct">✅ 腦幹</span>
+                    <div class="reason">植物人還有呼吸心跳，是因為「腦幹」沒壞，不是大腦或心臟喔！</div>
+                </div>
+            </div>
+
+            <div class="mistake-item">
+                <div class="mistake-title">⚡ 2. 縮手反射會不會痛？</div>
+                <div class="mistake-content">
+                    <span class="wrong">❌ 先感覺痛，才縮手</span>
+                    <span class="correct">✅ 先縮手，大腦才覺得痛</span>
+                    <div class="reason">反射由脊髓控制（快），痛覺要傳到大腦（慢），有時間差！</div>
+                </div>
+            </div>
+
+            <div class="mistake-item">
+                <div class="mistake-title">🛣️ 3. 四肢的訊息怎麼傳？</div>
+                <div class="mistake-content">
+                    <span class="wrong">❌ 直接連到大腦</span>
+                    <span class="correct">✅ 必須經過「脊髓」</span>
+                    <div class="reason">當受器、動器位於四肢時，脊髓是必經的通道，訊息一定要經過它！</div>
+                </div>
+            </div>
+
+            <div class="mistake-item">
+                <div class="mistake-title">👁️ 4. 眨眼反射誰管的？</div>
+                <div class="mistake-content">
+                    <span class="wrong">❌ 脊髓</span>
+                    <span class="correct">✅ 腦幹</span>
+                    <div class="reason">記住：頸部以上的反射（眨眼、噴嚏、咳嗽）大多是腦幹管的！</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kahoot 連結區 -->
+        <div class="kahoot-section">
+            <div class="circle-bg" style="top: -20px; left: -20px; width: 100px; height: 100px;"></div>
+            <div class="circle-bg" style="bottom: -20px; right: -20px; width: 150px; height: 150px;"></div>
+
+            <h2 style="color:white; border:none; font-size: 2rem; margin-bottom: 20px;">🎮 準備好要挑戰了嗎？</h2>
+            
+            <div class="nickname-box">
+                <div class="nickname-instruction">請注意！暱稱必須填寫：</div>
+                <div class="nickname-instruction" style="color:#f1c40f; font-weight:bold;">班級 + 座號 (共五碼)</div>
+                <div class="nickname-example">範例：72231</div>
+            </div>
+            
+            <br>
+
+            <a href="https://kahoot.it/challenge/02284118?challenge-id=7730cf4b-d2ef-444a-8f88-85aa805b0bed_1764647048091" target="_blank" class="kahoot-btn">
+                <div class="k-icon">K!</div>
+                開始挑戰
+            </a>
+            
+            <p style="margin-top: 20px; opacity: 0.8; font-size: 0.9rem;">點擊按鈕將開啟 Kahoot! 頁面</p>
+        </div>
+
+    </div>
+
+</body>
+</html>
