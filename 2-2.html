@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>神經科醫師診斷室 + AI 智慧助手</title>
+    <title>神經科醫師診斷室 (通用版)</title>
     <style>
+        * { box-sizing: border-box; }
+
         :root {
-            --primary: #34495e;
-            --accent: #1abc9c;
-            --bg-color: #f4f6f7;
+            --primary: #2c3e50;
+            --accent: #16a085;
+            --bg-color: #f0f2f5;
             --text-color: #2c3e50;
-            --highlight: #e74c3c;
+            --btn-bg: #fff;
+            --btn-hover: #e8f8f5;
+            /* 腦部顏色 */
+            --c-cerebrum: #e5989b;
+            --c-cerebellum: #ffb703;
+            --c-brainstem: #8ecae6;
+            --c-spinal: #cdb4db;
+            --c-sensory: #a2d2ff;
+            --c-motor: #ffafcc;
             --ai-color: #8e44ad;
         }
 
@@ -24,7 +34,6 @@
             align-items: center;
             min-height: 100vh;
             color: var(--text-color);
-            overflow-x: hidden; /* 防止水平捲動 */
         }
 
         header {
@@ -33,242 +42,266 @@
             color: white;
             padding: 15px 0;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        h1 { margin: 0; font-size: 1.8rem; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        .subtitle { font-size: 1rem; opacity: 0.8; margin-top: 5px; }
+        h1 { margin: 0; font-size: 1.6rem; }
+        .subtitle { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
 
-        /* 主容器：移除固定高度，改用彈性高度 */
-        .main-container {
+        /* --- 主版面：三欄式佈局 (病歷 | 圖片 | 按鈕) --- */
+        .game-wrapper {
             display: flex;
-            flex-direction: row;
             width: 95%;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 20px auto;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             overflow: hidden;
-            /* 修正版面問題：確保高度足夠但不強制撐開 */
-            min-height: auto; 
+            min-height: 600px;
         }
 
-        .chart-panel {
-            flex: 1;
-            padding: 30px;
+        /* 1. 左側：病歷與 AI */
+        .info-panel {
+            flex: 1.2;
+            padding: 25px;
             border-right: 1px solid #eee;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            position: relative;
         }
 
-        .case-number {
-            color: var(--accent);
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+        /* 2. 中間：解剖圖 (純展示) */
+        .diagram-panel {
+            flex: 1.5;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid #eee;
+            position: relative;
+            padding: 10px;
+        }
+
+        /* 3. 右側：按鈕控制區 */
+        .controls-panel {
+            flex: 0.8;
+            padding: 20px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* --- 元件樣式 --- */
+        .case-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .case-tag {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
 
         .ai-badge {
-            background-color: var(--ai-color);
+            background: var(--ai-color);
             color: white;
-            padding: 2px 8px;
+            padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
             display: none;
         }
 
-        .symptom-box {
-            font-size: 1.3rem;
+        .symptom-text {
+            font-size: 1.25rem;
             line-height: 1.6;
-            margin-bottom: 20px;
             font-weight: bold;
-            min-height: 80px;
+            margin-bottom: 20px;
+            color: #34495e;
         }
 
         .instruction {
-            color: #7f8c8d;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            padding: 10px;
             background: #ecf0f1;
-            border-radius: 5px;
-            border-left: 4px solid var(--primary);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
         }
 
-        .diagram-panel {
-            flex: 1;
-            background-color: #fff;
+        /* 按鈕網格 */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            padding: 20px;
+            box-shadow: 0 3px 0 #bdc3c7;
         }
 
+        .option-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--btn-hover);
+        }
+
+        /* 答對/答錯樣式 */
+        .option-btn.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #219150;
+            box-shadow: 0 3px 0 #219150;
+            pointer-events: none;
+        }
+
+        .option-btn.wrong {
+            background: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+            box-shadow: 0 3px 0 #c0392b;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* SVG 樣式 (靜態) */
         svg {
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            max-height: 600px;
-            /* 移除 drop-shadow 濾鏡，這是 Safari 破圖的主因 */
-            /* filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); */
-            touch-action: manipulation;
+            max-height: 550px;
+        }
+        
+        /* 構造文字標籤 */
+        .label-text {
+            font-size: 24px;
+            font-weight: bold;
+            fill: #333;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+        
+        .label-line {
+            stroke: #555;
+            stroke-width: 2;
         }
 
-        /* 互動效果 */
-        .brain-part, .brain-group {
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        .brain-part:hover, .brain-group:hover {
-            opacity: 0.8;
-        }
-
-        /* 高亮樣式 (透過 class 控制) */
-        .correct-highlight {
-            fill: #27ae60 !important;
-            stroke: #27ae60 !important;
-        }
-        .wrong-highlight {
-            fill: #e74c3c !important;
-            stroke: #c0392b !important;
-        }
-
-        /* 針對線條路徑的特殊高亮 (Safari Fix: 必須強制 fill="none") */
-        path.correct-highlight, g.correct-highlight path {
-            fill: none !important;
-            stroke: #27ae60 !important;
-        }
-        path.wrong-highlight, g.wrong-highlight path {
-            fill: none !important;
-            stroke: #c0392b !important;
-        }
-
-        /* 針對群組內的圓形/方形填充 */
-        g.correct-highlight circle, g.correct-highlight rect {
-            fill: #27ae60 !important;
-            stroke: #27ae60 !important;
-        }
-        g.wrong-highlight circle, g.wrong-highlight rect {
-            fill: #e74c3c !important;
-            stroke: #c0392b !important;
-        }
-
-        .feedback-area {
+        /* 回饋區 */
+        .feedback-box {
             margin-top: 20px;
             padding: 15px;
             border-radius: 8px;
             display: none;
             animation: fadeIn 0.5s;
         }
-        .feedback-area.correct { background-color: #d5f5e3; color: #145a32; border: 1px solid #27ae60; }
-        .feedback-area.wrong { background-color: #fadbd8; color: #7b241c; border: 1px solid #c0392b; }
+        .feedback-box.correct { background: #d5f5e3; color: #145a32; border: 1px solid #27ae60; }
+        .feedback-box.wrong { background: #fadbd8; color: #7b241c; border: 1px solid #c0392b; }
 
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-
-        .diagnosis-btn {
-            background-color: var(--accent);
-            color: white;
+        /* 功能按鈕 */
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 50px;
             border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             cursor: pointer;
-            display: none;
-            transition: transform 0.2s;
-            flex: 1;
-        }
-        .diagnosis-btn:hover { transform: scale(1.05); background-color: #16a085; }
-
-        .ai-btn {
-            background-color: white;
-            color: var(--ai-color);
-            border: 2px solid var(--ai-color);
-            padding: 8px 15px;
-            border-radius: 50px;
-            font-size: 0.95rem;
-            cursor: pointer;
+            margin-top: 15px;
             font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.2s;
+            transition: transform 0.2s;
         }
-        .ai-btn:hover { background-color: var(--ai-color); color: white; }
-        .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .next-btn { background: var(--accent); color: white; display: none; }
+        .next-btn:hover { background: #1abc9c; transform: scale(1.02); }
 
-        .ai-hint-box {
-            background-color: #f3e5f5;
-            border: 1px dashed var(--ai-color);
-            color: #4a235a;
-            padding: 10px;
-            border-radius: 8px;
+        .ai-btn { 
+            background: white; 
+            color: var(--ai-color); 
+            border: 2px solid var(--ai-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .ai-btn:hover { background: #fdf2ff; }
+
+        .ai-gen-btn { background: var(--ai-color); color: white; display: none; }
+        .ai-gen-btn:hover { background: #7d3c98; }
+
+        .hint-display {
             margin-top: 10px;
+            padding: 10px;
+            background: #fdf2ff;
+            border: 1px dashed var(--ai-color);
+            color: var(--ai-color);
+            border-radius: 6px;
             font-size: 0.9rem;
             display: none;
-            animation: fadeIn 0.5s;
         }
 
         .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #ecf0f1;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 100;
+            width: 100%; height: 6px; background: #ddd; position: fixed; top: 0; left: 0; z-index: 99;
         }
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.5s;
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s; }
+
+        /* RWD 調整 */
+        @media (max-width: 900px) {
+            .game-wrapper { flex-direction: column; }
+            .info-panel, .diagram-panel, .controls-panel { border-right: none; border-bottom: 1px solid #eee; padding: 20px; }
+            .diagram-panel { order: 1; min-height: 300px; } /* 手機版圖在最上或中間 */
+            .controls-panel { order: 2; } /* 按鈕在圖下方 */
+            .info-panel { order: 3; } /* 說明在最下或最上 */
+            
+            /* 優化手機順序: 說明 -> 圖 -> 按鈕 */
+            .game-wrapper { display: flex; flex-direction: column; }
+            .info-panel { order: 1; padding-bottom: 10px; }
+            .diagram-panel { order: 2; padding: 0; }
+            .controls-panel { order: 3; }
+            .options-grid { grid-template-columns: repeat(3, 1fr); } /* 手機改3欄比較好按 */
         }
 
-        .loading-spinner {
+        .final-link {
             display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid currentColor;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column-reverse; }
-            .chart-panel { border-right: none; border-top: 1px solid #eee; padding: 20px; }
-            .diagram-panel { min-height: 400px; }
-            .symptom-box { font-size: 1.2rem; }
-        }
-
-        .final-btn {
-            margin-top: 30px;
-            margin-bottom: 50px;
+            margin: 30px;
             padding: 15px 40px;
-            font-size: 1.3rem;
             background: var(--primary);
             color: white;
             text-decoration: none;
             border-radius: 50px;
+            font-size: 1.2rem;
             display: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
-        .final-btn:hover { background-color: #2c3e50; transform: translateY(-3px); }
 
     </style>
 </head>
@@ -277,130 +310,123 @@
     <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
 
     <header>
-        <h1>👨‍⚕️ 神經科醫生診斷室</h1>
-        <div class="subtitle">請根據病患症狀，點擊代號位置進行診斷</div>
+        <h1>👨‍⚕️ 神經科醫師診斷室</h1>
+        <div class="subtitle">請閱讀病歷，並選擇右側對應的構造代號</div>
     </header>
 
-    <div class="main-container" id="game-panel">
-        <div class="chart-panel">
-            <div class="case-number">
-                <span id="case-num">CASE 01</span>
-                <span class="ai-badge" id="ai-badge">✨ AI 生成病歷</span>
+    <div class="game-wrapper">
+        
+        <!-- 左側：資訊區 -->
+        <div class="info-panel">
+            <div class="case-header">
+                <span class="case-tag" id="case-tag">CASE 01</span>
+                <span class="ai-badge" id="ai-badge">AI 生成</span>
             </div>
             
-            <div class="symptom-box" id="symptom-text">
-                病患送醫時還有呼吸心跳，但這幾天觀察下來，他完全沒有意識，無法思考，對外界呼喚也沒有反應（類似植物人狀態）。
-            </div>
-            
-            <div class="instruction">
-                請點擊右圖：這位病患受損最嚴重的構造代號是？
+            <div class="symptom-text" id="symptom-text">
+                病患送醫時還有呼吸心跳，但這幾天觀察下來，他完全沒有意識，無法思考，對外界呼喚也沒有反應。
             </div>
 
-            <div class="btn-group" id="tools-area">
-                <button class="ai-btn" id="hint-btn" onclick="getAIHint()">
-                    <span>✨ 呼叫 AI 顧問</span>
-                </button>
+            <div class="instruction">
+                🤔 診斷：請問是哪個部位受損？請點擊代號。
             </div>
-            
-            <div class="ai-hint-box" id="ai-hint-display"></div>
-            <div class="feedback-area" id="feedback-box"></div>
-            
-            <div class="btn-group">
-                <button class="diagnosis-btn" id="next-btn" onclick="nextCase()">下一位病患 ➜</button>
-                <button class="diagnosis-btn" id="ai-case-btn" onclick="generateAICase()" style="background-color: var(--ai-color); display:none;">✨ 生成 AI 新病例</button>
-            </div>
+
+            <button class="action-btn ai-btn" id="hint-btn" onclick="getAIHint()">
+                <span>✨ 呼叫 AI 顧問</span>
+            </button>
+            <div class="hint-display" id="hint-box"></div>
+
+            <div class="feedback-box" id="feedback-box"></div>
+
+            <button class="action-btn next-btn" id="next-btn" onclick="nextCase()">下一位病患 ➜</button>
+            <button class="action-btn ai-gen-btn" id="ai-gen-btn" onclick="generateAICase()">✨ 生成 AI 新病例</button>
         </div>
 
+        <!-- 中間：圖示區 (SVG) -->
         <div class="diagram-panel">
-            <svg viewBox="0 0 400 500" id="brain-svg">
-                <!-- 輪廓 (背景) -->
-                <path d="M100,150 Q100,50 200,50 Q300,50 300,150 Q300,250 200,250 L200,380" stroke="none" fill="#f0f0f0" opacity="0.5"/>
+            <svg viewBox="0 0 400 500">
+                <!-- 背景輪廓 -->
+                <path d="M100,150 Q100,50 200,50 Q300,50 300,150 Q300,250 200,250 L200,380" fill="#f4f6f7" stroke="none"/>
 
-                <!-- 使用 SVG 屬性直接定義顏色，提高 Safari 相容性 -->
+                <!-- 構造繪製 (純色塊，無互動) -->
+                <!-- 脊髓 (丁) -->
+                <path d="M180,220 L180,420 L220,420 L220,220 Z" fill="var(--c-spinal)" stroke="#7f8c8d" stroke-width="2"/>
+                <!-- 腦幹 (丙) -->
+                <path d="M170,180 L170,230 L230,230 L230,180 Q210,170 190,170 Q180,170 170,180 Z" fill="var(--c-brainstem)" stroke="#7f8c8d" stroke-width="2"/>
+                <!-- 小腦 (乙) -->
+                <path d="M220,180 Q290,180 300,220 Q290,260 230,260 Q200,260 220,180 Z" fill="var(--c-cerebellum)" stroke="#7f8c8d" stroke-width="2"/>
+                <!-- 大腦 (甲) -->
+                <path d="M130,160 Q130,50 230,50 Q310,50 310,150 Q310,180 250,180 L230,180 Q170,180 130,160" fill="var(--c-cerebrum)" stroke="#7f8c8d" stroke-width="2"/>
+
+                <!-- 感覺神經 (戊) + 受器 -->
+                <circle cx="50" cy="350" r="15" fill="var(--c-sensory)" stroke="#555" stroke-width="2"/>
+                <path d="M65,350 Q120,350 180,360" fill="none" stroke="var(--c-sensory)" stroke-width="4" stroke-dasharray="5,2"/>
+                <circle cx="160" cy="358" r="6" fill="var(--c-sensory)"/>
                 
-                <!-- 丁：脊髓 -->
-                <path id="part-spinal" class="brain-part" 
-                      d="M180,220 L180,420 L220,420 L220,220 Z" 
-                      fill="#cdb4db" stroke="#7f8c8d" stroke-width="2"
-                      onclick="checkAnswer('spinal')"/>
+                <!-- 運動神經 (己) + 動器 -->
+                <path d="M220,380 Q280,380 350,380" fill="none" stroke="var(--c-motor)" stroke-width="4" stroke-dasharray="5,2"/>
+                <rect x="350" y="365" width="30" height="30" rx="5" fill="var(--c-motor)" stroke="#555" stroke-width="2"/>
+
+                <!-- 標籤與指引線 -->
+                <!-- 甲 -->
+                <text x="100" y="100" class="label-text">甲</text>
+                <line x1="115" y1="100" x2="160" y2="110" class="label-line"/>
                 
-                <!-- 丙：腦幹 -->
-                <path id="part-brainstem" class="brain-part" 
-                      d="M170,180 L170,230 L230,230 L230,180 Q210,170 190,170 Q180,170 170,180 Z" 
-                      fill="#8ecae6" stroke="#7f8c8d" stroke-width="2"
-                      onclick="checkAnswer('brainstem')"/>
-                
-                <!-- 乙：小腦 -->
-                <path id="part-cerebellum" class="brain-part" 
-                      d="M220,180 Q290,180 300,220 Q290,260 230,260 Q200,260 220,180 Z" 
-                      fill="#ffb703" stroke="#7f8c8d" stroke-width="2"
-                      onclick="checkAnswer('cerebellum')"/>
-                
-                <!-- 甲：大腦 -->
-                <path id="part-cerebrum" class="brain-part" 
-                      d="M130,160 Q130,50 230,50 Q310,50 310,150 Q310,180 250,180 L230,180 Q170,180 130,160" 
-                      fill="#e5989b" stroke="#7f8c8d" stroke-width="2"
-                      onclick="checkAnswer('cerebrum')"/>
+                <!-- 乙 -->
+                <text x="320" y="220" class="label-text">乙</text>
+                <line x1="305" y1="220" x2="280" y2="215" class="label-line"/>
 
-                <!-- 戊：感覺神經元 -->
-                <g id="part-sensory" class="brain-group" onclick="checkAnswer('sensory')">
-                    <!-- 透明粗線，增加點擊範圍 (Safari Fix: 使用微弱顏色而非 transparent) -->
-                    <path d="M65,350 Q120,350 180,360" fill="none" stroke="rgba(255,255,255,0.001)" stroke-width="20" />
-                    
-                    <!-- 實際顯示 -->
-                    <circle cx="50" cy="350" r="15" fill="#a2d2ff" stroke="#555" stroke-width="2" />
-                    <path d="M65,350 Q120,350 180,360" fill="none" stroke="#a2d2ff" stroke-width="5" stroke-dasharray="5,2" />
-                    <circle cx="160" cy="358" r="6" fill="#a2d2ff" stroke="none" />
-                </g>
+                <!-- 丙 -->
+                <text x="110" y="215" class="label-text">丙</text>
+                <line x1="125" y1="215" x2="175" y2="210" class="label-line"/>
 
-                <!-- 己：運動神經元 -->
-                <g id="part-motor" class="brain-group" onclick="checkAnswer('motor')">
-                    <!-- 透明粗線，增加點擊範圍 -->
-                    <path d="M220,380 Q280,380 350,380" fill="none" stroke="rgba(255,255,255,0.001)" stroke-width="20" />
-                    
-                    <!-- 實際顯示 -->
-                    <path d="M220,380 Q280,380 350,380" fill="none" stroke="#ffafcc" stroke-width="5" stroke-dasharray="5,2" />
-                    <rect x="350" y="365" width="30" height="30" rx="5" fill="#ffafcc" stroke="#555" stroke-width="2" />
-                </g>
+                <!-- 丁 -->
+                <text x="240" y="300" class="label-text">丁</text>
+                <line x1="230" y1="300" x2="200" y2="295" class="label-line"/>
 
-                <!-- 標籤 (無框樣式) -->
-                <text x="100" y="100" font-size="24" font-weight="bold" fill="#333" pointer-events="none">甲</text>
-                <line x1="125" y1="95" x2="160" y2="110" stroke="#555" stroke-width="2"/>
-                <text x="320" y="220" font-size="24" font-weight="bold" fill="#333" pointer-events="none">乙</text>
-                <line x1="315" y1="215" x2="280" y2="215" stroke="#555" stroke-width="2"/>
-                <text x="110" y="215" font-size="24" font-weight="bold" fill="#333" pointer-events="none">丙</text>
-                <line x1="135" y1="210" x2="175" y2="210" stroke="#555" stroke-width="2"/>
-                <text x="240" y="300" font-size="24" font-weight="bold" fill="#333" pointer-events="none">丁</text>
-                <line x1="235" y1="295" x2="200" y2="295" stroke="#555" stroke-width="2"/>
-                
-                <text x="100" y="330" font-size="24" font-weight="bold" fill="#333" pointer-events="none">戊</text>
-                <line x1="120" y1="335" x2="140" y2="350" stroke="#555" stroke-width="2"/>
-                <text x="280" y="350" font-size="24" font-weight="bold" fill="#333" pointer-events="none">己</text>
-                <line x1="275" y1="355" x2="250" y2="380" stroke="#555" stroke-width="2"/>
+                <!-- 戊 -->
+                <text x="100" y="330" class="label-text">戊</text>
+                <line x1="115" y1="330" x2="140" y2="350" class="label-line"/>
 
-                <text x="20" y="390" font-size="24" font-weight="bold" fill="#333" pointer-events="none">受器</text>
-                <line x1="45" y1="380" x2="50" y2="365" stroke="#555" stroke-width="2"/>
+                <!-- 己 -->
+                <text x="280" y="350" class="label-text">己</text>
+                <line x1="270" y1="350" x2="250" y2="380" class="label-line"/>
 
-                <text x="340" y="420" font-size="24" font-weight="bold" fill="#333" pointer-events="none">動器</text>
-                <line x1="365" y1="400" x2="365" y2="395" stroke="#555" stroke-width="2"/>
+                <!-- 受器/動器 文字標示 -->
+                <text x="50" y="390" font-size="16" fill="#333" font-weight="bold" text-anchor="middle">受器</text>
+                <text x="365" y="415" font-size="16" fill="#333" font-weight="bold" text-anchor="middle">動器</text>
 
             </svg>
         </div>
+
+        <!-- 右側：控制按鈕 -->
+        <div class="controls-panel">
+            <p style="margin:0; font-weight:bold; color:#7f8c8d;">選擇代號：</p>
+            <div class="options-grid">
+                <button class="option-btn" onclick="checkAnswer('cerebrum', this)">甲</button>
+                <button class="option-btn" onclick="checkAnswer('cerebellum', this)">乙</button>
+                <button class="option-btn" onclick="checkAnswer('brainstem', this)">丙</button>
+                <button class="option-btn" onclick="checkAnswer('spinal', this)">丁</button>
+                <button class="option-btn" onclick="checkAnswer('sensory', this)">戊</button>
+                <button class="option-btn" onclick="checkAnswer('motor', this)">己</button>
+            </div>
+        </div>
+
     </div>
 
-    <a href="3-0.html" class="final-btn" id="final-link">🎉 診斷完成！前往單元三</a>
+    <a href="3-0.html" class="final-link" id="final-link">🎉 診斷完成！前往單元3:意識與反射</a>
 
     <script>
-        const apiKey = ""; 
+        const apiKey = ""; // 請在此填入您的 API Key
 
         const fixedCases = [
-            { id: 1, text: "病患送醫時還有呼吸心跳，但這幾天觀察下來，他完全沒有意識，無法思考，對外界呼喚也沒有反應（類似植物人狀態）。", answer: "cerebrum", correctMsg: "✅ 診斷正確！(甲)<br>甲是大腦，受損會導致意識喪失、無法思考，變成植物人。但他還有呼吸心跳，表示腦幹功能正常。", wrongMsg: "❌ 診斷錯誤。<br>這個部位如果受損，通常會影響平衡或生命徵象，但病患的問題是「沒有意識」。" },
-            { id: 2, text: "病患主訴最近走路無法走直線，一直搖搖晃晃，拿杯子時手也會抖個不停，無法準確抓握。", answer: "cerebellum", correctMsg: "✅ 診斷正確！(乙)<br>乙是小腦，負責協調全身肌肉與維持平衡。走路搖晃、動作不準確是典型的小腦受損症狀。", wrongMsg: "❌ 診斷錯誤。<br>病患意識清楚，呼吸也正常，主要是「動作協調」出了問題。" },
-            { id: 3, text: "這是一起嚴重車禍，病患到院前已經停止呼吸與心跳，經過急救仍宣告不治。", answer: "brainstem", correctMsg: "✅ 診斷正確！(丙)<br>丙是腦幹，被稱為「生命中樞」，負責控制呼吸與心搏。一旦受損，生命會立即受到威脅。", wrongMsg: "❌ 診斷錯誤。<br>病患是直接喪失生命徵象（呼吸心跳），這是更深層的中樞控制的。" },
-            { id: 4, text: "病患從高處跌落後，腰部以下完全失去知覺（下半身癱瘓），也無法控制排便，但手部活動正常，意識也清醒。", answer: "spinal", correctMsg: "✅ 診斷正確！(丁)<br>丁是脊髓，是腦與軀幹的通道。脊髓受損，會導致訊號無法傳到下半身，造成癱瘓。", wrongMsg: "❌ 診斷錯誤。<br>病患的頭腦都很清楚，問題是出在「訊號傳不到下半身」。" },
-            { id: 5, text: "病患中風後，雖然聽得懂別人在說什麼，但自己卻無法說出流暢的句子（失語症），或是記不住家人的名字。", answer: "cerebrum", correctMsg: "✅ 診斷正確！(甲)<br>語言、記憶、說話能力都是由大腦皮層控制的高級功能。", wrongMsg: "❌ 診斷錯誤。<br>語言與記憶是很高階的功能，通常不歸小腦或腦幹管轄。" },
-            { id: 6, text: "【挑戰題】病患眼睛遇到強光瞳孔會縮小（反射正常），但是你叫他算「3+2=？」他卻算不出來。", answer: "cerebrum", correctMsg: "✅ 診斷正確！(甲)<br>算術思考是大腦負責。雖然瞳孔反射（腦幹控制）正常，但無法運算代表大腦受損。", wrongMsg: "❌ 診斷錯誤。<br>這題有陷阱！瞳孔反射正常代表腦幹(丙)沒事，但「算數學」是誰負責的呢？" },
-            { id: 7, text: "【挑戰題】病患感覺身體逐漸無力，手腳肌肉開始萎縮，走路容易跌倒，甚至連拿筷子都有困難。但是他的感覺正常（被捏會痛），意識也非常清楚，還能跟醫生算數學。", answer: "motor", correctMsg: "✅ 診斷正確！(己)<br>這是典型的運動神經元疾病（如漸凍人）。運動神經元(己)受損導致肌肉無法接收指令而萎縮，但感覺(戊)和思考(甲)功能通常不受影響。", wrongMsg: "❌ 診斷錯誤。<br>病患「感覺正常」代表受器與感覺神經元(戊)沒壞，「意識清楚」代表大腦(甲)沒壞。問題是出在肌肉收不到命令！" }
+            { id: 1, text: "病患送醫時還有呼吸心跳，但這幾天觀察下來，他完全沒有意識，無法思考，對外界呼喚也沒有反應（類似植物人狀態）。", answer: "cerebrum", correctMsg: "✅ 診斷正確！(甲 大腦)<br>大腦受損導致意識喪失。還有呼吸心跳表示腦幹正常。", wrongMsg: "❌ 診斷錯誤。<br>這個部位受損通常會影響平衡或生命徵象，但病患的問題是「沒有意識」。" },
+            { id: 2, text: "病患主訴最近走路無法走直線，一直搖搖晃晃，拿杯子時手也會抖個不停，無法準確抓握。", answer: "cerebellum", correctMsg: "✅ 診斷正確！(乙 小腦)<br>小腦負責協調肌肉與平衡。走路搖晃是典型症狀。", wrongMsg: "❌ 診斷錯誤。<br>病患意識清楚，主要是「動作協調」出了問題。" },
+            { id: 3, text: "這是一起嚴重車禍，病患到院前已經停止呼吸與心跳，經過急救仍宣告不治。", answer: "brainstem", correctMsg: "✅ 診斷正確！(丙 腦幹)<br>腦幹是生命中樞，控制呼吸心跳。", wrongMsg: "❌ 診斷錯誤。<br>喪失生命徵象是更深層的中樞控制的。" },
+            { id: 4, text: "病患從高處跌落後，腰部以下完全失去知覺（下半身癱瘓），也無法控制排便，但手部活動正常，意識也清醒。", answer: "spinal", correctMsg: "✅ 診斷正確！(丁 脊髓)<br>脊髓受損導致訊號無法傳到下半身。", wrongMsg: "❌ 診斷錯誤。<br>問題出在訊號傳導中斷，而非大腦思考問題。" },
+            { id: 5, text: "病患中風後，雖然聽得懂別人在說什麼，但自己卻無法說出流暢的句子（失語症），或是記不住家人的名字。", answer: "cerebrum", correctMsg: "✅ 診斷正確！(甲 大腦)<br>語言與記憶是大腦的高級功能。", wrongMsg: "❌ 診斷錯誤。<br>語言與記憶功能不在這裡。" },
+            { id: 6, text: "【挑戰題】病患眼睛遇到強光瞳孔會縮小（反射正常），但是你叫他算「3+2=？」他卻算不出來。", answer: "cerebrum", correctMsg: "✅ 診斷正確！(甲 大腦)<br>瞳孔反射(腦幹)正常，但無法運算代表大腦受損。", wrongMsg: "❌ 診斷錯誤。<br>陷阱題！反射正常代表腦幹沒事，算數學是誰管的？" },
+            { id: 7, text: "【挑戰題】病患感覺身體逐漸無力，手腳肌肉開始萎縮。但是他的感覺正常（被捏會痛），意識也非常清楚。", answer: "motor", correctMsg: "✅ 診斷正確！(己 運動神經元)<br>感覺正常、意識清楚，但肌肉無力，是運動神經元的問題（如漸凍人）。", wrongMsg: "❌ 診斷錯誤。<br>感覺正常代表受器與感覺神經沒壞，意識清楚代表大腦沒壞。" }
         ];
 
         let currentIdx = 0;
@@ -416,22 +442,25 @@
             isSolved = false;
             
             const caseTitle = caseData.isAI ? `AI CASE` : `CASE 0${currentIdx + 1}`;
-            document.getElementById('case-num').innerText = caseTitle;
+            document.getElementById('case-tag').innerText = caseTitle;
             document.getElementById('symptom-text').innerText = caseData.text;
             document.getElementById('ai-badge').style.display = caseData.isAI ? 'inline-block' : 'none';
 
+            // Reset UI
             document.getElementById('feedback-box').style.display = 'none';
             document.getElementById('next-btn').style.display = 'none';
-            document.getElementById('ai-case-btn').style.display = 'none';
-            document.getElementById('ai-hint-display').style.display = 'none';
+            document.getElementById('ai-gen-btn').style.display = 'none';
+            document.getElementById('hint-box').style.display = 'none';
             document.getElementById('hint-btn').disabled = false;
             document.getElementById('hint-btn').innerHTML = '<span>✨ 呼叫 AI 顧問</span>';
             
-            document.querySelectorAll('.brain-part, .brain-group').forEach(el => {
-                el.classList.remove('correct-highlight', 'wrong-highlight');
-                el.style.pointerEvents = 'auto';
+            // Reset buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.className = 'option-btn'; // remove correct/wrong
+                btn.disabled = false;
             });
 
+            // Progress bar
             if (!caseData.isAI) {
                 const percent = (currentIdx / fixedCases.length) * 100;
                 document.getElementById('progress-fill').style.width = `${percent}%`;
@@ -440,37 +469,35 @@
             }
         }
 
-        function checkAnswer(partId) {
+        function checkAnswer(partId, btnElement) {
             if (isSolved) return;
 
             const feedbackBox = document.getElementById('feedback-box');
-            let clickedPart = document.getElementById('part-' + partId);
-            
             feedbackBox.style.display = 'block';
 
             if (partId === currentCase.answer) {
                 isSolved = true;
                 feedbackBox.innerHTML = currentCase.correctMsg;
-                feedbackBox.className = "feedback-area correct";
-                clickedPart.classList.add('correct-highlight');
+                feedbackBox.className = "feedback-box correct";
+                btnElement.classList.add('correct');
                 
-                document.querySelectorAll('.brain-part, .brain-group').forEach(el => el.style.pointerEvents = 'none');
+                // Disable all buttons
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
 
                 if (!currentCase.isAI && currentIdx < fixedCases.length - 1) {
                     document.getElementById('next-btn').style.display = 'block';
                 } else {
-                    document.getElementById('ai-case-btn').style.display = 'block';
+                    document.getElementById('ai-gen-btn').style.display = 'block';
                     document.getElementById('final-link').style.display = 'inline-block';
                     document.getElementById('progress-fill').style.width = '100%';
                 }
 
             } else {
                 feedbackBox.innerHTML = currentCase.wrongMsg || "❌ 診斷錯誤，請再試一次。";
-                feedbackBox.className = "feedback-area wrong";
-                clickedPart.classList.add('wrong-highlight');
-                setTimeout(() => {
-                    clickedPart.classList.remove('wrong-highlight');
-                }, 500);
+                feedbackBox.className = "feedback-box wrong";
+                btnElement.classList.add('wrong');
+                // Remove wrong class after animation
+                setTimeout(() => btnElement.classList.remove('wrong'), 500);
             }
         }
 
@@ -481,18 +508,19 @@
             }
         }
 
+        // --- AI Functions ---
         async function getAIHint() {
             const btn = document.getElementById('hint-btn');
-            const hintBox = document.getElementById('ai-hint-display');
+            const hintBox = document.getElementById('hint-box');
             
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> AI 思考中...';
+            btn.innerHTML = 'Thinking...';
 
             const prompt = `
-                你是一位國中生物老師。學生正在進行神經系統的診斷遊戲。
-                目前的病例症狀是：「${currentCase.text}」。
-                請給學生一個簡短的提示(Hint)，引導他思考是哪個部位受損，但「絕對不要」直接說出答案名稱(如大腦、小腦、脊髓等)。
-                請用繁體中文回答，語氣鼓勵且神秘，50字以內。
+                你是一位生物老師。學生正在玩診斷遊戲。
+                病例症狀：「${currentCase.text}」。
+                請給一個簡短提示，引導他思考受損部位(大腦/小腦/腦幹/脊髓/感覺/運動神經)，但不要直接說出答案。
+                用繁體中文，50字內。
             `;
 
             try {
@@ -501,45 +529,30 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
-                
                 const data = await response.json();
                 const hintText = data.candidates[0].content.parts[0].text;
                 
                 hintBox.style.display = 'block';
-                hintBox.innerHTML = `<strong>💡 AI 顧問提示：</strong><br>${hintText}`;
-                
-            } catch (error) {
-                console.error(error);
+                hintBox.innerHTML = `<strong>💡 AI 提示：</strong><br>${hintText}`;
+            } catch (e) {
+                console.error(e);
                 hintBox.style.display = 'block';
-                hintBox.innerText = "⚠️ AI 連線忙碌中，請稍後再試。";
+                hintBox.innerText = "AI 連線忙碌中";
             } finally {
                 btn.innerHTML = '<span>✨ 呼叫 AI 顧問</span>';
             }
         }
 
         async function generateAICase() {
-            const btn = document.getElementById('ai-case-btn');
+            const btn = document.getElementById('ai-gen-btn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> AI 生成中...';
+            btn.innerHTML = 'Generating...';
 
             const prompt = `
-                請生成一個國中生物程度的「神經系統受損病例」。
-                目標部位必須是以下其中之一：
-                - cerebrum (大腦): 意識, 記憶, 感覺, 運動, 語言
-                - cerebellum (小腦): 平衡, 協調
-                - brainstem (腦幹): 呼吸, 心跳, 生命中樞
-                - spinal (脊髓): 軀幹四肢傳導, 反射
-                - sensory (感覺神經元): 感覺傳入
-                - motor (運動神經元): 肌肉運動傳出
-                
-                請回傳一個純 JSON 物件，格式如下：
-                {
-                    "text": "描述病人的症狀(繁體中文)...",
-                    "answer": "對應的部位代碼 (如 cerebrum)",
-                    "correctMsg": "✅ 診斷正確！(說明原因...)",
-                    "wrongMsg": "❌ 診斷錯誤。(提示...)"
-                }
-                內容要生動有趣，符合醫學邏輯但不要太深奧。
+                生成一個國中生物「神經系統受損病例」。
+                部位選擇: cerebrum, cerebellum, brainstem, spinal, sensory, motor
+                回傳 JSON: { "text": "症狀描述", "answer": "部位代碼", "correctMsg": "詳解", "wrongMsg": "錯誤提示" }
+                繁體中文。
             `;
 
             try {
@@ -551,17 +564,13 @@
                         generationConfig: { responseMimeType: "application/json" }
                     })
                 });
-
                 const data = await response.json();
                 const aiCaseData = JSON.parse(data.candidates[0].content.parts[0].text);
-                
                 aiCaseData.isAI = true;
-                
                 renderCase(aiCaseData);
-
-            } catch (error) {
-                console.error(error);
-                alert("AI 生成失敗，請檢查網路或稍後再試。");
+            } catch (e) {
+                console.error(e);
+                alert("AI 生成失敗");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '✨ 生成 AI 新病例';
@@ -569,7 +578,6 @@
         }
 
         init();
-
     </script>
 </body>
 </html>
