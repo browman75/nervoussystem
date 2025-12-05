@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神經傳導路徑排序挑戰</title>
+    <style>
+        :root {
+            --primary: #2980b9;
+            --accent: #f39c12;
+            --bg-color: #f0f3f5;
+            --card-bg: #fff;
+            --text-color: #2c3e50;
+            --success: #27ae60;
+            --error: #c0392b;
+        }
+
+        body {
+            font-family: "微軟正黑體", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+            user-select: none;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+        .level-info { font-size: 1rem; margin-top: 5px; opacity: 0.9; }
+
+        /* 遊戲主區 */
+        .game-container {
+            width: 95%;
+            max-width: 900px;
+            margin: 20px auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 題目區 */
+        .question-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--accent);
+        }
+
+        .scenario { font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; }
+        .hint { font-size: 0.95rem; color: #7f8c8d; }
+
+        /* 答案排序區 (Sequence) */
+        .sequence-area {
+            background: #e8eaeb;
+            min-height: 120px;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 2px dashed #bdc3c7;
+            transition: all 0.3s;
+        }
+
+        .sequence-area.correct {
+            border-color: var(--success);
+            background-color: #eafaf1;
+        }
+
+        .sequence-area.wrong {
+            border-color: var(--error);
+            animation: shake 0.4s;
+        }
+
+        /* 卡片樣式 */
+        .card {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #dcdcdc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #34495e;
+            transition: transform 0.1s, background 0.2s;
+            white-space: nowrap;
+        }
+
+        .card:active { transform: scale(0.95); }
+        .card:hover { border-color: var(--primary); background: #fdfdfd; }
+
+        /* 流程中的卡片 */
+        .card.in-seq {
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
+        }
+        
+        .card.in-seq:hover { background: #c0392b; } /* Hover 提示刪除 (紅色) */
+
+        .arrow {
+            color: #95a5a6;
+            font-size: 1.2rem;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        /* 選項池 (Pool) */
+        .options-pool {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+        }
+
+        .pool-title {
+            font-size: 1rem;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .pool-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* 種類標籤顏色區分 */
+        .card[data-type="receptor"] { border-bottom: 3px solid #e67e22; }
+        .card[data-type="effector"] { border-bottom: 3px solid #27ae60; }
+        .card[data-type="cns"] { border-bottom: 3px solid #8e44ad; }
+        .card[data-type="neuron"] { border-bottom: 3px solid #2980b9; }
+
+        /* 按鈕區 */
+        .control-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-2px); background: #1f618d; }
+        .btn:disabled { background: #95a5a6; cursor: not-allowed; transform: none; }
+
+        /* 完成畫面 */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+            display: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>神經傳導路徑排序</h1>
+        <div class="level-info" id="level-display">題目 1 / 4</div>
+    </header>
+
+    <div class="game-container">
+        <!-- 題目 -->
+        <div class="question-box">
+            <div class="scenario" id="q-text">題目載入中...</div>
+            <div class="hint">請依序點擊下方字卡，排列出神經傳導的路徑。</div>
+        </div>
+
+        <!-- 排列區 -->
+        <div class="sequence-area" id="sequence-box">
+            <span style="color:#bdc3c7; font-style:italic;">(請點選下方字卡加入...)</span>
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="control-area">
+            <button class="btn" id="submit-btn" onclick="checkAnswer()">送出答案</button>
+        </div>
+
+        <!-- 字卡池 -->
+        <div class="options-pool">
+            <div class="pool-title">可用字卡 (點擊加入)</div>
+            <div class="pool-grid" id="pool-box">
+                <!-- 受器 -->
+                <div class="card" data-type="receptor" onclick="addToSequence('眼(受器)')">眼(受器)</div>
+                <div class="card" data-type="receptor" onclick="addToSequence('耳(受器)')">耳(受器)</div>
+                <div class="card" data-type="receptor" onclick="addToSequence('鼻(受器)')">鼻(受器)</div>
+                <div class="card" data-type="receptor" onclick="addToSequence('舌(受器)')">舌(受器)</div>
+                <div class="card" data-type="receptor" onclick="addToSequence('皮膚(受器)')">皮膚(受器)</div>
+                
+                <!-- 神經元 -->
+                <div class="card" data-type="neuron" onclick="addToSequence('感覺神經元')">感覺神經元</div>
+                <div class="card" data-type="neuron" onclick="addToSequence('運動神經元')">運動神經元</div>
+
+                <!-- 中樞 -->
+                <div class="card" data-type="cns" onclick="addToSequence('大腦')">大腦</div>
+                <div class="card" data-type="cns" onclick="addToSequence('小腦')">小腦</div>
+                <div class="card" data-type="cns" onclick="addToSequence('腦幹')">腦幹</div>
+                <div class="card" data-type="cns" onclick="addToSequence('脊髓')">脊髓</div>
+                
+                <!-- 動器 -->
+                <div class="card" data-type="effector" onclick="addToSequence('肌肉(動器)')">肌肉(動器)</div>
+                <div class="card" data-type="effector" onclick="addToSequence('腺體(動器)')">腺體(動器)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 恭喜通關 -->
+    <div class="modal" id="finish-modal">
+        <h1 style="font-size: 3rem; color: #f1c40f;">挑戰成功！🎉</h1>
+        <p style="font-size: 1.5rem; margin-top: 20px;">你已經完全掌握神經傳導路徑了！</p>
+        <button class="btn" style="margin-top:40px; background:#e67e22;" onclick="location.reload()">再玩一次</button>
+        <a href="unit_summary.html" class="btn" style="margin-top:20px; background:#27ae60; text-decoration:none;">前往總結頁面</a>
+    </div>
+
+    <script>
+        // 題目資料 (共4題)
+        const levels = [
+            {
+                id: 1,
+                text: "題目 1：腳踩到針，立刻縮腳 (反射作用)",
+                // 說明：四肢反射，由脊髓控制，不經大腦。
+                answer: ["皮膚(受器)", "感覺神經元", "脊髓", "運動神經元", "肌肉(動器)"]
+            },
+            {
+                id: 2,
+                text: "題目 2：腳踩到針，覺得很痛，手摸腳 (意識行為)",
+                // 說明：痛覺傳到大腦，手部動作由大腦下令。
+                // 完整路徑：皮膚 -> 感覺 -> 脊髓 -> 大腦 -> 脊髓 -> 運動 -> 肌肉
+                answer: ["皮膚(受器)", "感覺神經元", "脊髓", "大腦", "脊髓", "運動神經元", "肌肉(動器)"]
+            },
+            {
+                id: 3,
+                text: "題目 3：聞到香味，不自覺流口水 (反射作用)",
+                // 說明：頭部反射(唾液分泌)，中樞在腦幹。
+                answer: ["鼻(受器)", "感覺神經元", "腦幹", "運動神經元", "腺體(動器)"]
+            },
+            {
+                id: 4,
+                text: "題目 4：看到球飛過來，想眨眼，但刻意不眨眼 (意識行為)",
+                // 說明：視覺(眼) -> 大腦(判斷與控制) -> 運動神經元(控制眼部肌肉) -> 肌肉。
+                // 修改：依據指示，簡化路徑，不經過腦幹。
+                answer: ["眼(受器)", "感覺神經元", "大腦", "運動神經元", "肌肉(動器)"]
+            }
+        ];
+
+        let currentLevelIndex = 0;
+        let userSequence = []; // 存使用者目前的排序
+
+        // 初始化
+        function initGame() {
+            loadLevel(0);
+        }
+
+        function loadLevel(index) {
+            currentLevelIndex = index;
+            const level = levels[index];
+            
+            document.getElementById('level-display').innerText = `題目 ${index + 1} / ${levels.length}`;
+            document.getElementById('q-text').innerText = level.text;
+            
+            // 清空排序區
+            userSequence = [];
+            renderSequence();
+            
+            // 重置狀態
+            const seqBox = document.getElementById('sequence-box');
+            seqBox.className = 'sequence-area';
+            document.getElementById('submit-btn').innerText = "送出答案";
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        // 加入卡片到序列
+        function addToSequence(text) {
+            userSequence.push(text);
+            renderSequence();
+        }
+
+        // 移除最後一張卡片
+        function removeLast() {
+            if (userSequence.length > 0) {
+                userSequence.pop();
+                renderSequence();
+            }
+        }
+
+        // 渲染序列區
+        function renderSequence() {
+            const container = document.getElementById('sequence-box');
+            container.innerHTML = '';
+
+            if (userSequence.length === 0) {
+                container.innerHTML = '<span style="color:#bdc3c7; font-style:italic;">(請點選下方字卡加入...)</span>';
+                return;
+            }
+
+            userSequence.forEach((item, index) => {
+                // 箭頭
+                if (index > 0) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'arrow';
+                    arrow.innerText = '⮕';
+                    container.appendChild(arrow);
+                }
+
+                // 卡片
+                const card = document.createElement('div');
+                card.className = 'card in-seq';
+                card.innerText = item;
+                
+                // 只有最後一張可以點擊移除
+                if (index === userSequence.length - 1) {
+                    card.onclick = removeLast;
+                    card.title = "點擊移除";
+                } else {
+                    card.style.cursor = "default";
+                    card.style.opacity = "0.9";
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        // 檢查答案
+        function checkAnswer() {
+            const currentLevel = levels[currentLevelIndex];
+            const correctSeq = currentLevel.answer;
+            const seqBox = document.getElementById('sequence-box');
+            const btn = document.getElementById('submit-btn');
+
+            // 比對長度與內容
+            let isCorrect = true;
+            if (userSequence.length !== correctSeq.length) {
+                isCorrect = false;
+            } else {
+                for (let i = 0; i < correctSeq.length; i++) {
+                    if (userSequence[i] !== correctSeq[i]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isCorrect) {
+                // 答對
+                seqBox.classList.add('correct');
+                btn.innerText = "✅ 正確！下一題...";
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    if (currentLevelIndex < levels.length - 1) {
+                        loadLevel(currentLevelIndex + 1);
+                    } else {
+                        document.getElementById('finish-modal').style.display = 'flex';
+                    }
+                }, 1500);
+
+            } else {
+                // 答錯
+                seqBox.classList.add('wrong');
+                btn.innerText = "❌ 順序有誤，請修正";
+                
+                setTimeout(() => {
+                    seqBox.classList.remove('wrong');
+                    btn.innerText = "送出答案";
+                }, 1000);
+            }
+        }
+
+        // 啟動
+        initGame();
+
+    </script>
+</body>
+</html>
